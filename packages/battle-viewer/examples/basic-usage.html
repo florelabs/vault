@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BattleViewer Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    battle-viewer {
+      width: 100%;
+      height: 400px;
+      margin: 20px 0;
+    }
+    
+    .controls {
+      margin: 20px 0;
+    }
+    
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>BattleViewer Example</h1>
+  <p>This example demonstrates the basic usage of the BattleViewer web component.</p>
+  
+  <battle-viewer id="viewer"></battle-viewer>
+  
+  <div class="controls">
+    <button onclick="loadBasicBattle()">Load Basic Battle</button>
+    <button onclick="loadComplexBattle()">Load Complex Battle</button>
+    <button onclick="clearBattle()">Clear</button>
+  </div>
+
+  <script type="module">
+    // Import the web component
+    import "../dist/index.js";
+
+    // Battle data examples
+    const basicBattle = {
+      participants: [
+        {
+          id: "hero",
+          name: "Hero",
+          initialPosition: { x: 100, y: 200 }
+        },
+        {
+          id: "monster",
+          name: "Monster",
+          initialPosition: { x: 300, y: 200 }
+        }
+      ],
+      turns: [
+        {
+          id: "turn-1",
+          timestamp: Date.now(),
+          actions: [
+            {
+              type: "move",
+              actor: "hero",
+              position: { x: 150, y: 200 }
+            }
+          ]
+        },
+        {
+          id: "turn-2",
+          timestamp: Date.now() + 1000,
+          actions: [
+            {
+              type: "attack",
+              actor: "hero",
+              target: "monster"
+            }
+          ]
+        }
+      ]
+    };
+
+    const complexBattle = {
+      participants: [
+        {
+          id: "player1",
+          name: "Knight",
+          initialPosition: { x: 50, y: 150 }
+        },
+        {
+          id: "player2", 
+          name: "Mage",
+          initialPosition: { x: 50, y: 250 }
+        },
+        {
+          id: "enemy1",
+          name: "Orc",
+          initialPosition: { x: 350, y: 150 }
+        },
+        {
+          id: "enemy2",
+          name: "Goblin",
+          initialPosition: { x: 350, y: 250 }
+        }
+      ],
+      turns: [
+        {
+          id: "turn-1",
+          timestamp: Date.now(),
+          actions: [
+            {
+              type: "move",
+              actor: "player1",
+              position: { x: 150, y: 150 }
+            },
+            {
+              type: "skill",
+              actor: "player2",
+              target: "enemy1",
+              data: { skillName: "Fireball" }
+            }
+          ]
+        },
+        {
+          id: "turn-2",
+          timestamp: Date.now() + 1000,
+          actions: [
+            {
+              type: "attack",
+              actor: "enemy1",
+              target: "player1"
+            },
+            {
+              type: "move",
+              actor: "enemy2",
+              position: { x: 300, y: 200 }
+            }
+          ]
+        }
+      ]
+    };
+
+    // Make functions global for button onclick
+    window.loadBasicBattle = () => {
+      const viewer = document.getElementById("viewer");
+      viewer.setBattleData(basicBattle);
+    };
+
+    window.loadComplexBattle = () => {
+      const viewer = document.getElementById("viewer");
+      viewer.setBattleData(complexBattle);
+    };
+
+    window.clearBattle = () => {
+      const viewer = document.getElementById("viewer");
+      viewer.setBattleData({ participants: [], turns: [] });
+    };
+
+    // Load basic battle on page load
+    window.addEventListener("load", () => {
+      loadBasicBattle();
+    });
+  </script>
+</body>
+</html>

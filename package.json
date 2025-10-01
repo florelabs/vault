@@ -1,0 +1,47 @@
+{
+  "name": "florelabs/vault",
+  "private": true,
+  "packageManager": "pnpm@10.17.1",
+  "description": "Technical framework + AI agents to accelerate development, quality, and releases of JS/TS libraries",
+  "author": "Thomas Florelli",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "bootstrap": "pnpm install",
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "type-check": "turbo run type-check",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
+    "ci": "pnpm lint && pnpm type-check && pnpm test && pnpm build",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md}": [
+      "biome format --write"
+    ],
+    "*.{ts,tsx}": [
+      "biome check --fix"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.29.7",
+    "@types/node": "^20.17.10",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "turbo": "^2.5.8",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

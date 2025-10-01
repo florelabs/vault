@@ -1,0 +1,5 @@
+packages:
+  - 'packages/*'
+
+# Hoist common dependencies to root
+prefer-workspace-packages: true

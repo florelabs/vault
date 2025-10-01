@@ -1,0 +1,43 @@
+{
+  "name": "@florelabs/battle-blocks",
+  "version": "0.0.0",
+  "description": "A Blockly Web Component specialized for generating battle arena instructions",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "keywords": ["web-components", "blockly", "battle-arena", "game-tools", "visual-programming"],
+  "author": "Thomas Florelli",
+  "license": "MIT",
+  "dependencies": {
+    "blockly": "^11.1.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.17.10",
+    "jsdom": "^25.0.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BattleBlocks Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    battle-blocks {
+      width: 100%;
+      height: 500px;
+      margin: 20px 0;
+    }
+    
+    .output {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 20px 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .controls {
+      margin: 20px 0;
+    }
+    
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 0;
+    }
+
+    .readonly {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>BattleBlocks Example</h1>
+  <p>This example demonstrates the visual programming interface for creating battle logic.</p>
+  
+  <battle-blocks id="editor"></battle-blocks>
+  
+  <div class="controls">
+    <button onclick="toggleReadonly()">Toggle Readonly</button>
+    <button onclick="loadSampleProgram()">Load Sample Program</button>
+    <button onclick="clearWorkspace()">Clear Workspace</button>
+    <button onclick="exportProgram()">Export XML</button>
+  </div>
+
+  <div class="output">
+    <h3>Generated Code:</h3>
+    <pre id="code-output">// Code will appear here when you add blocks...</pre>
+  </div>
+
+  <div class="output">
+    <h3>AST (Abstract Syntax Tree):</h3>
+    <pre id="ast-output">[]</pre>
+  </div>
+
+  <script type="module">
+    // Import the web component
+    import "../dist/index.js";
+
+    const editor = document.getElementById("editor");
+    const codeOutput = document.getElementById("code-output");
+    const astOutput = document.getElementById("ast-output");
+    
+    let isReadonly = false;
+
+    // Listen for code changes
+    editor.addEventListener("codechange", (event) => {
+      const { code, ast } = event.detail;
+      
+      // Update displays
+      codeOutput.textContent = code || "// No code generated yet";
+      astOutput.textContent = JSON.stringify(ast, null, 2);
+    });
+
+    // Sample XML program
+    const sampleXML = `
+      <xml xmlns="https://developers.google.com/blockly/xml">
+        <block type="battle_action" id="sample1" x="100" y="100">
+          <field name="ACTION_TYPE">move</field>
+          <value name="TARGET">
+            <block type="text" id="target1">
+              <field name="TEXT">player1</field>
+            </block>
+          </value>
+          <statement name="PARAMETERS">
+            <block type="battle_parameter" id="param1">
+              <field name="PARAM_NAME">position</field>
+              <value name="VALUE">
+                <block type="battle_position" id="pos1">
+                  <field name="X">150</field>
+                  <field name="Y">200</field>
+                </block>
+              </value>
+            </block>
+          </statement>
+          <next>
+            <block type="battle_action" id="sample2">
+              <field name="ACTION_TYPE">attack</field>
+              <value name="TARGET">
+                <block type="text" id="target2">
+                  <field name="TEXT">enemy1</field>
+                </block>
+              </value>
+            </block>
+          </next>
+        </block>
+      </xml>
+    `;
+
+    // Make functions global for button onclick
+    window.toggleReadonly = () => {
+      isReadonly = !isReadonly;
+      if (isReadonly) {
+        editor.setAttribute("readonly", "true");
+        editor.classList.add("readonly");
+      } else {
+        editor.removeAttribute("readonly");
+        editor.classList.remove("readonly");
+      }
+    };
+
+    window.loadSampleProgram = () => {
+      editor.loadXML(sampleXML.trim());
+    };
+
+    window.clearWorkspace = () => {
+      editor.loadXML('<xml xmlns="https://developers.google.com/blockly/xml"></xml>');
+    };
+
+    window.exportProgram = () => {
+      const xml = editor.getXML();
+      console.log("Exported XML:", xml);
+      
+      // Create download
+      const blob = new Blob([xml], { type: "application/xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "battle-program.xml";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Initial setup
+    window.addEventListener("load", () => {
+      console.log("BattleBlocks example loaded");
+    });
+  </script>
+</body>
+</html>
