@@ -15,8 +15,13 @@
   },
   "files": ["dist", "README.md"],
   "scripts": {
-    "dev": "tsup --watch",
+    "dev": "vite serve examples --host",
+    "dev:watch": "concurrently \"tsup --watch\" \"vite serve examples --host\"",
+    "pack:sprites": "node scripts/pack-sprites.mjs --out examples/atlases --pot --size 2048",
+    "pack:sprites:fighter": "node scripts/pack-sprites.mjs --out examples/atlases --pot --size 2048 --input examples/sprites/stickman/Fighter sprites --name fighter",
     "build": "tsup",
+    "build:cdn": "vite build --config vite.config.cdn.ts",
+    "preview": "vite preview examples",
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
@@ -27,14 +32,17 @@
   "author": "Thomas Florelli",
   "license": "MIT",
   "dependencies": {
-    "pixi.js": "^8.6.6"
+    "pixi.js": "^8.13.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^20.17.10",
+    "concurrently": "^9.1.0",
     "jsdom": "^25.0.1",
     "tsup": "^8.5.0",
     "typescript": "^5.7.3",
+    "free-tex-packer-core": "^0.3.5",
+    "vite": "^6.0.1",
     "vitest": "^3.2.4"
   },
   "publishConfig": {

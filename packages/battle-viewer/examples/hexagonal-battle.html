@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hexagonal Battle Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    battle-viewer {
+      width: 100%;
+      height: 600px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #218838;
+    }
+    
+    button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .play-controls button {
+      background: #007bff;
+    }
+    
+    .play-controls button:hover {
+      background: #0056b3;
+    }
+    
+    .info {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+      font-family: monospace;
+    }
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "pixi.js": "https://esm.sh/pixi.js@8"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Hexagonal Battle Example</h1>
+    <p>This example demonstrates hexagonal grid combat with character movement and animations.</p>
+    
+    <battle-viewer id="hexViewer"></battle-viewer>
+    
+    <div class="controls">
+      <button onclick="loadHexBattle()">Load Hex Battle</button>
+      <button onclick="loadLargeBattle()">Load Large Battle</button>
+      <button onclick="customizeArena()">Customize Arena</button>
+    </div>
+    
+    <div class="play-controls controls">
+      <button onclick="playBattle()">▶️ Play</button>
+      <button onclick="pauseBattle()">⏸️ Pause</button>
+      <button onclick="resetBattle()">⏹️ Reset</button>
+    </div>
+    
+    <div class="info" id="battleInfo">
+      Battle Status: Ready to load
+    </div>
+  </div>
+
+  <script type="module">
+    // Import the web component from source (development) or dist (production)
+    import "@florelabs/battle-viewer";
+
+    // Hexagonal battle data
+    const hexBattle = {
+      participants: [
+        {
+          id: "p1",
+          name: "Knight",
+          initialPosition: { q: 1, r: 2 },
+          spriteConfig: {
+            spritesheet: "/atlases/stickman-fighter.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "fighter_Idle",
+              run: "fighter_run",
+              attack: "fighter_combo",
+              hit: "fighter_hit"
+            },
+          },
+          weaponId: 1
+        },
+        {
+          id: "p2",
+          name: "Archer",
+          initialPosition: { q: -2, r: 1 },
+          spriteConfig: {
+            spritesheet: "/atlases/stickman-fighter-sword.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "sword_Idle",
+              run: "sword_run",
+              attack: "sword_combo",
+              hit: "sword_hit"
+            }
+          },
+          weaponId: 2
+        },
+        {
+          id: "e1",
+          name: "Orc",
+          initialPosition: { q: -1, r: -2 },
+          spriteConfig: {
+            spritesheet: "/atlases/stickman-fighter-pistol.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "pistol_Idle",
+              run: "pistol_run",
+              attack: "pistol_shot",
+              hit: "pistol_hit"
+            }
+          },
+          weaponId: 0
+        }
+      ],
+      turns: [
+        {
+          id: "turn-1",
+          timestamp: Date.now(),
+          actions: [
+            {
+              type: "move",
+              actor: "p1",
+              path: [
+                { q: 1, r: 2 },
+                { q: 0, r: 2 },
+                { q: -1, r: 2 },
+                { q: -1, r: 1 }
+              ]
+            }
+          ]
+        },
+        {
+          id: "turn-2", 
+          timestamp: Date.now() + 2000,
+          actions: [
+            {
+              type: "attack",
+              actor: "p1",
+              target: "p2",
+              position: { q: -1, r: -2 }
+            }
+          ]
+        },
+        {
+          id: "turn-3",
+          timestamp: Date.now() + 3000,
+          actions: [
+            {
+              type: "move",
+              actor: "p2",
+              path: [
+                { q: -2, r: 1 },
+                { q: -2, r: 0 },
+                { q: -2, r: -1 }
+              ]
+            },
+            {
+              type: "attack", 
+              actor: "p2",
+              target: "e1",
+              position: { q: -1, r: -2 }
+            }
+          ]
+        },
+        {
+          id: "turn-4",
+          timestamp: Date.now() + 5000,
+          actions: [
+            {
+              type: "move",
+              actor: "e1",
+              path: [
+                { q: 0, r: -2 },
+                { q: 1, r: -2 },
+                { q: 2, r: -3 }
+              ]
+            },
+            {
+              type: "attack",
+              actor: "e1", 
+              target: "p2",
+              position: { q: -2, r: -1 }
+            },
+            {
+              type: "attack",
+              actor: "e1", 
+              target: "p1",
+              position: { q: -1, r: 1 }
+            }
+          ]
+        }
+      ]
+    };
+
+    // Global functions for buttons
+    window.loadHexBattle = () => {
+      const viewer = document.getElementById("hexViewer");
+      viewer.setBattleData(hexBattle);
+      updateInfo("Hex battle loaded");
+    };
+
+    window.customizeArena = () => {
+      const viewer = document.getElementById("hexViewer");
+      viewer.setArenaConfig({
+        radius: 7,
+        tileSize: 40,
+        backgroundColor: 0x2c5aa0
+      });
+      updateInfo("Arena customized: radius=7, tileSize=40");
+    };
+
+    window.playBattle = () => {
+      const viewer = document.getElementById("hexViewer");
+      viewer.setPlaying(true);
+      updateInfo("Battle playing...");
+    };
+
+    window.pauseBattle = () => {
+      const viewer = document.getElementById("hexViewer");
+      viewer.setPlaying(false);
+      updateInfo("Battle paused");
+    };
+
+    window.resetBattle = () => {
+      const viewer = document.getElementById("hexViewer");
+      viewer.reset();
+      updateInfo("Battle reset");
+    };
+
+    function updateInfo(message) {
+      document.getElementById("battleInfo").textContent = `Battle Status: ${message}`;
+    }
+
+    // Auto-load on page load
+    window.addEventListener("load", () => {
+      // Set initial arena config, including tiles atlas provided by client
+      const viewer = document.getElementById("hexViewer");
+      viewer.setArenaConfig({
+        radius: 5,
+        tileSize: 32,
+        backgroundColor: 0x1a472a,
+        tileSpritesheet: "/atlases/hex_tiles.json",
+        // Choose the tile texture either by name or by index
+        tileTextureName: "hex_grass.png"
+        // Or alternatively: tileTextureIndex: 0
+      });
+
+      loadHexBattle();
+    });
+  </script>
+</body>
+</html>

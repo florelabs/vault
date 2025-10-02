@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BattleViewer Examples</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .header h1 {
+      font-size: 3em;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+      margin-top: 10px;
+    }
+    
+    .examples {
+      display: grid;
+      gap: 20px;
+      margin-top: 40px;
+    }
+    
+    .example-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .example-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    
+    .example-card h3 {
+      margin-top: 0;
+      color: #fff;
+      font-size: 1.4em;
+    }
+    
+    .example-card p {
+      opacity: 0.9;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    
+    .example-link {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .example-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(5px);
+    }
+    
+    .features {
+      margin-top: 40px;
+      text-align: center;
+    }
+    
+    .features h2 {
+      margin-bottom: 20px;
+      font-size: 1.8em;
+    }
+    
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .feature {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .version {
+      text-align: center;
+      margin-top: 40px;
+      opacity: 0.7;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎮 BattleViewer</h1>
+    <p>Auto-battle visualizer with hexagonal grid support</p>
+  </div>
+
+  <div class="examples">
+    <div class="example-card">
+      <h3>🧪 Simple Test</h3>
+      <p>Minimal test to verify the library is working correctly. Great starting point for debugging.</p>
+      <a href="test-simple.html" class="example-link">View Test →</a>
+    </div>
+
+    <div class="example-card">
+      <h3>🎯 Basic Usage</h3>
+      <p>Simple hexagonal battle setup with two characters. Perfect for understanding the core concepts and API.</p>
+      <a href="basic-usage.html" class="example-link">View Basic Example →</a>
+    </div>
+
+    <div class="example-card">
+      <h3>⚔️ Hexagonal Battle</h3>
+      <p>Advanced combat demonstration with multiple characters, complex paths, and interactive controls.</p>
+      <a href="hexagonal-battle.html" class="example-link">View Advanced Example →</a>
+    </div>
+
+    <div class="example-card">
+      <h3>🌐 CDN Integration</h3>
+      <p>Production-ready example showing how to use the library from a CDN without any build process.</p>
+      <a href="cdn-example.html" class="example-link">View CDN Example →</a>
+    </div>
+  </div>
+
+  <div class="features">
+    <h2>✨ Features</h2>
+    <div class="feature-list">
+      <div class="feature">🎨 PixiJS Graphics</div>
+      <div class="feature">🗺️ Hexagonal Grid</div>
+      <div class="feature">🎭 Character Animations</div>
+      <div class="feature">⚡ High Performance</div>
+      <div class="feature">📦 Web Component</div>
+      <div class="feature">🎮 Battle Orchestration</div>
+    </div>
+  </div>
+
+  <div class="version">
+    <p>Built with PixiJS 8 • TypeScript • Web Components</p>
+  </div>
+</body>
+</html>

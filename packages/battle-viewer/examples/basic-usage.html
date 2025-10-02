@@ -50,21 +50,29 @@
   </div>
 
   <script type="module">
-    // Import the web component
-    import "../dist/index.js";
+    // Import the web component from source (development) or dist (production)
+    import "@florelabs/battle-viewer";
 
-    // Battle data examples
+    // Battle data examples with hexagonal coordinates
     const basicBattle = {
       participants: [
         {
           id: "hero",
           name: "Hero",
-          initialPosition: { x: 100, y: 200 }
+          initialPosition: { q: 1, r: 1 },
+          spriteConfig: {
+            spritesheet: "", // Empty for now - will use default rendering
+            size: { width: 48, height: 48 }
+          }
         },
         {
           id: "monster",
-          name: "Monster",
-          initialPosition: { x: 300, y: 200 }
+          name: "Monster", 
+          initialPosition: { q: -2, r: 1 },
+          spriteConfig: {
+            spritesheet: "", // Empty for now - will use default rendering
+            size: { width: 48, height: 48 }
+          }
         }
       ],
       turns: [
@@ -75,18 +83,19 @@
             {
               type: "move",
               actor: "hero",
-              position: { x: 150, y: 200 }
+              path: [{ q: 1, r: 1 }, { q: 0, r: 1 }, { q: -1, r: 1 }]
             }
           ]
         },
         {
-          id: "turn-2",
+          id: "turn-2", 
           timestamp: Date.now() + 1000,
           actions: [
             {
               type: "attack",
               actor: "hero",
-              target: "monster"
+              target: "monster",
+              position: { q: -2, r: 1 }
             }
           ]
         }
@@ -98,22 +107,38 @@
         {
           id: "player1",
           name: "Knight",
-          initialPosition: { x: 50, y: 150 }
+          initialPosition: { q: 2, r: 0 },
+          spriteConfig: {
+            spritesheet: "",
+            size: { width: 48, height: 48 }
+          }
         },
         {
           id: "player2", 
           name: "Mage",
-          initialPosition: { x: 50, y: 250 }
+          initialPosition: { q: 2, r: -1 },
+          spriteConfig: {
+            spritesheet: "",
+            size: { width: 48, height: 48 }
+          }
         },
         {
           id: "enemy1",
           name: "Orc",
-          initialPosition: { x: 350, y: 150 }
+          initialPosition: { q: -2, r: 0 },
+          spriteConfig: {
+            spritesheet: "",
+            size: { width: 48, height: 48 }
+          }
         },
         {
           id: "enemy2",
-          name: "Goblin",
-          initialPosition: { x: 350, y: 250 }
+          name: "Goblin", 
+          initialPosition: { q: -2, r: 1 },
+          spriteConfig: {
+            spritesheet: "",
+            size: { width: 48, height: 48 }
+          }
         }
       ],
       turns: [
@@ -124,29 +149,31 @@
             {
               type: "move",
               actor: "player1",
-              position: { x: 150, y: 150 }
+              path: [{ q: 2, r: 0 }, { q: 1, r: 0 }, { q: 0, r: 0 }]
             },
             {
               type: "skill",
               actor: "player2",
               target: "enemy1",
+              position: { q: -2, r: 0 },
               data: { skillName: "Fireball" }
             }
           ]
         },
         {
           id: "turn-2",
-          timestamp: Date.now() + 1000,
+          timestamp: Date.now() + 2000,
           actions: [
             {
               type: "attack",
-              actor: "enemy1",
-              target: "player1"
+              actor: "enemy1", 
+              target: "player1",
+              position: { q: 0, r: 0 }
             },
             {
-              type: "move",
+              type: "move", 
               actor: "enemy2",
-              position: { x: 300, y: 200 }
+              path: [{ q: -2, r: 1 }, { q: -1, r: 1 }, { q: 0, r: 1 }]
             }
           ]
         }

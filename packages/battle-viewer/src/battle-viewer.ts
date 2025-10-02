@@ -6,50 +6,36 @@
  */
 
 import { Application } from "pixi.js";
-
-export interface BattleTurn {
-  id: string;
-  timestamp: number;
-  actions: BattleAction[];
-}
-
-export interface BattleAction {
-  type: "move" | "attack" | "skill" | "effect";
-  actor: string;
-  target?: string;
-  position?: { x: number; y: number };
-  data?: Record<string, unknown>;
-}
-
-export interface BattleData {
-  turns: BattleTurn[];
-  participants: BattleParticipant[];
-}
-
-export interface BattleParticipant {
-  id: string;
-  name: string;
-  initialPosition: { x: number; y: number };
-  sprite?: string;
-}
+import { BattleArena } from "./core/battle-arena.js";
+import { BattleOrchestrator } from "./core/battle-orchestrator.js";
+import type { ArenaConfig, BattleData } from "./types/index.js";
 
 export class BattleViewer extends HTMLElement {
   private app: Application | null = null;
   private battleData: BattleData | null = null;
+  private arena: BattleArena | null = null;
+  private orchestrator: BattleOrchestrator | null = null;
+  private arenaConfig: ArenaConfig = {
+    radius: 5,
+    tileSize: 32,
+    backgroundColor: 0x1099bb,
+  };
+  private root!: ShadowRoot;
 
   static get observedAttributes(): string[] {
-    return ["data"];
+    return ["data", "config"];
   }
 
   constructor() {
     super();
-    this.attachShadow({ mode: "closed" });
+    this.root = this.attachShadow({ mode: "closed" });
     this.setupStyles();
     this.setupCanvas();
   }
 
   connectedCallback(): void {
-    this.initializePixiApp();
+    // Wait for the element to be fully connected and sized
+    setTimeout(() => this.initializePixiApp(), 0);
   }
 
   disconnectedCallback(): void {
@@ -65,11 +51,19 @@ export class BattleViewer extends HTMLElement {
         console.error("Invalid battle data:", error);
       }
     }
+
+    if (name === "config" && newValue !== oldValue) {
+      try {
+        const config = JSON.parse(newValue || "{}");
+        this.arenaConfig = { ...this.arenaConfig, ...config };
+        this.reinitializeArena();
+      } catch (error) {
+        console.error("Invalid arena config:", error);
+      }
+    }
   }
 
   private setupStyles(): void {
-    if (!this.shadowRoot) return;
-
     const style = document.createElement("style");
     style.textContent = `
       :host {
@@ -87,56 +81,102 @@ export class BattleViewer extends HTMLElement {
         display: block;
       }
     `;
-    this.shadowRoot.appendChild(style);
+    this.root.appendChild(style);
   }
 
   private setupCanvas(): void {
-    if (!this.shadowRoot) return;
-
     const canvas = document.createElement("canvas");
     canvas.id = "battle-canvas";
-    this.shadowRoot.appendChild(canvas);
+    this.root.appendChild(canvas);
   }
 
   private async initializePixiApp(): Promise<void> {
-    if (!this.shadowRoot) return;
+    const canvas = this.root.getElementById("battle-canvas") as HTMLCanvasElement;
+    if (!canvas) {
+      console.warn("Canvas element not found");
+      return;
+    }
 
-    const canvas = this.shadowRoot.getElementById("battle-canvas") as HTMLCanvasElement;
-    if (!canvas) return;
+    // Get actual dimensions, fallback to defaults
+    const rect = this.getBoundingClientRect();
+    const width = rect.width > 0 ? rect.width : 800;
+    const height = rect.height > 0 ? rect.height : 400;
 
     try {
       this.app = new Application();
       await this.app.init({
         canvas,
-        width: this.clientWidth || 800,
-        height: this.clientHeight || 400,
-        backgroundColor: 0x1099bb,
+        width: Math.floor(width),
+        height: Math.floor(height),
+        backgroundColor: this.arenaConfig.backgroundColor,
         antialias: true,
         resolution: window.devicePixelRatio || 1,
         autoDensity: true,
       });
 
+      console.log(`PixiJS initialized: ${width}x${height}`);
+
+      await this.initializeArena();
+
       // Initial render if data is already available
       if (this.battleData) {
-        this.renderBattle();
+        await this.renderBattle();
       }
     } catch (error) {
       console.error("Failed to initialize PixiJS application:", error);
     }
   }
 
-  private renderBattle(): void {
-    if (!this.app || !this.battleData) return;
+  private async initializeArena(): Promise<void> {
+    if (!this.app) return;
+
+    try {
+      this.arena = new BattleArena(this.app, this.arenaConfig);
+      await this.arena.initialize();
+
+      this.orchestrator = new BattleOrchestrator(this.arena);
+      console.log("Arena initialized successfully");
+    } catch (error) {
+      console.error("Failed to initialize arena:", error);
+    }
+  }
+
+  private async reinitializeArena(): Promise<void> {
+    if (this.arena) {
+      this.arena.destroy();
+    }
+    await this.initializeArena();
+    if (this.battleData) {
+      this.renderBattle();
+    }
+  }
+
+  private async renderBattle(): Promise<void> {
+    if (!this.app || !this.battleData || !this.arena || !this.orchestrator) return;
 
     // Clear existing content
-    this.app.stage.removeChildren();
+    this.arena.clear();
 
-    // TODO: Implement actual battle rendering
-    // This is a placeholder implementation
-    console.log("Rendering battle with data:", this.battleData);
+    // Setup participants
+    for (const participant of this.battleData.participants) {
+      await this.arena.addCharacter(participant);
+    }
+
+    // Start orchestration
+    this.orchestrator.setBattleData(this.battleData);
   }
 
   private cleanup(): void {
+    if (this.orchestrator) {
+      this.orchestrator.destroy();
+      this.orchestrator = null;
+    }
+
+    if (this.arena) {
+      this.arena.destroy();
+      this.arena = null;
+    }
+
     if (this.app) {
       this.app.destroy(true, { children: true, texture: true });
       this.app = null;
@@ -156,6 +196,46 @@ export class BattleViewer extends HTMLElement {
    */
   getBattleData(): BattleData | null {
     return this.battleData;
+  }
+
+  /**
+   * Set arena configuration
+   */
+  setArenaConfig(config: Partial<ArenaConfig>): void {
+    this.arenaConfig = { ...this.arenaConfig, ...config };
+    this.reinitializeArena();
+  }
+
+  /**
+   * Get arena configuration
+   */
+  getArenaConfig(): ArenaConfig {
+    return { ...this.arenaConfig };
+  }
+
+  /**
+   * Play/pause the battle orchestration
+   */
+  setPlaying(playing: boolean): void {
+    if (this.orchestrator) {
+      this.orchestrator.setPlaying(playing);
+    }
+  }
+
+  /**
+   * Reset the battle to the beginning
+   */
+  reset(): void {
+    if (this.orchestrator) {
+      this.orchestrator.reset();
+    }
+  }
+
+  /**
+   * Get the battle arena instance for advanced usage
+   */
+  getArena(): BattleArena | null {
+    return this.arena;
   }
 }
 

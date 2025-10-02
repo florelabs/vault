@@ -22,7 +22,7 @@ describe("BattleViewer", () => {
   });
 
   it("should have observed attributes", () => {
-    expect(BattleViewer.observedAttributes).toEqual(["data"]);
+    expect(BattleViewer.observedAttributes).toEqual(["data", "config"]);
   });
 
   it("should handle battle data programmatically", () => {
@@ -35,7 +35,7 @@ describe("BattleViewer", () => {
     expect(element.getBattleData()).toEqual(battleData);
   });
 
-  it("should handle battle data via attribute", () => {
+  it("should handle hexagonal battle data via attribute", () => {
     const battleData: BattleData = {
       turns: [
         {
@@ -45,7 +45,10 @@ describe("BattleViewer", () => {
             {
               type: "move",
               actor: "player1",
-              position: { x: 10, y: 20 },
+              path: [
+                { q: 1, r: 1 },
+                { q: 0, r: 1 },
+              ],
             },
           ],
         },
@@ -54,13 +57,32 @@ describe("BattleViewer", () => {
         {
           id: "player1",
           name: "Player 1",
-          initialPosition: { x: 0, y: 0 },
+          initialPosition: { q: 1, r: 1 },
+          spriteConfig: {
+            spritesheet: "/test.json",
+            size: { width: 64, height: 64 },
+          },
         },
       ],
     };
 
     element.setAttribute("data", JSON.stringify(battleData));
     expect(element.getBattleData()).toEqual(battleData);
+  });
+
+  it("should handle arena configuration", () => {
+    const config = {
+      radius: 6,
+      tileSize: 40,
+      backgroundColor: 0x123456,
+    };
+
+    element.setArenaConfig(config);
+    const currentConfig = element.getArenaConfig();
+
+    expect(currentConfig.radius).toBe(6);
+    expect(currentConfig.tileSize).toBe(40);
+    expect(currentConfig.backgroundColor).toBe(0x123456);
   });
 
   it("should handle invalid JSON gracefully", () => {
@@ -71,5 +93,14 @@ describe("BattleViewer", () => {
     expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
+  });
+
+  it("should control playback", () => {
+    // Test basic API - actual functionality would need battle data and arena setup
+    expect(() => {
+      element.setPlaying(true);
+      element.setPlaying(false);
+      element.reset();
+    }).not.toThrow();
   });
 });

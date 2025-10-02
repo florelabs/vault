@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BattleViewer CDN Example</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      color: #2c3e50;
+      margin: 0 0 10px 0;
+      font-size: 2.5em;
+    }
+    
+    .header p {
+      color: #7f8c8d;
+      font-size: 1.1em;
+      margin: 0;
+    }
+    
+    .cdn-info {
+      background: #e8f4fd;
+      border: 1px solid #bee5eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .cdn-info h3 {
+      color: #0c5460;
+      margin-top: 0;
+    }
+    
+    .cdn-info code {
+      background: #d1ecf1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #0c5460;
+    }
+    
+    battle-viewer {
+      width: 100%;
+      height: 500px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .status {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+      border-left: 4px solid #28a745;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .back-link {
+      display: inline-block;
+      color: #667eea;
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">← Back to Examples</a>
+
+  <div class="header">
+    <h1>🌐 CDN Integration Example</h1>
+    <p>Using BattleViewer directly from CDN without any build process</p>
+  </div>
+
+  <div class="cdn-info">
+    <h3>📦 CDN Usage</h3>
+    <p>This example loads the library from a CDN (simulated with local build):</p>
+    <p><code>&lt;script src="https://cdn.jsdelivr.net/npm/@florelabs/battle-viewer/dist/cdn/battle-viewer.iife.js"&gt;&lt;/script&gt;</code></p>
+    <p>Or as ES module: <code>import "https://cdn.jsdelivr.net/npm/@florelabs/battle-viewer"</code></p>
+  </div>
+
+  <battle-viewer id="cdnViewer"></battle-viewer>
+
+  <div class="controls">
+    <button onclick="loadEpicBattle()">🏰 Load Epic Battle</button>
+    <button onclick="loadSmallSkirmish()">⚔️ Load Small Skirmish</button>
+    <button onclick="customizeViewer()">🎨 Customize Arena</button>
+    <button onclick="playBattle()" id="playBtn">▶️ Play</button>
+    <button onclick="resetBattle()">🔄 Reset</button>
+  </div>
+
+  <div class="status" id="status">
+    Status: Ready to load battle data
+  </div>
+
+  <!-- Load from local CDN build for demo (in production, this would be the actual CDN URL) -->
+  <script src="../dist/cdn/battle-viewer.iife.js"></script>
+  <script>
+    // The IIFE build exposes BattleViewer globally
+    console.log('BattleViewer loaded from CDN (IIFE build)');
+    
+    // Initialize after DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeCDNExample();
+    });
+
+    function initializeCDNExample() {
+      // Epic battle data
+      const epicBattle = {
+        participants: [
+          {
+            id: "paladin",
+            name: "Sir Galahad",
+            initialPosition: { q: 3, r: -2 },
+            spriteConfig: { size: { width: 56, height: 56 } }
+          },
+          {
+            id: "wizard",
+            name: "Merlin",
+            initialPosition: { q: 2, r: -3 },
+            spriteConfig: { size: { width: 52, height: 52 } }
+          },
+          {
+            id: "rogue",
+            name: "Shadow",
+            initialPosition: { q: 4, r: -3 },
+            spriteConfig: { size: { width: 48, height: 48 } }
+          },
+          {
+            id: "dragon",
+            name: "Ancient Red",
+            initialPosition: { q: -3, r: 2 },
+            spriteConfig: { size: { width: 80, height: 80 } }
+          },
+          {
+            id: "orc1",
+            name: "Orc Warrior",
+            initialPosition: { q: -2, r: 3 },
+            spriteConfig: { size: { width: 52, height: 52 } }
+          },
+          {
+            id: "orc2",
+            name: "Orc Berserker", 
+            initialPosition: { q: -4, r: 3 },
+            spriteConfig: { size: { width: 52, height: 52 } }
+          }
+        ],
+        turns: [
+          {
+            id: "turn-1",
+            timestamp: Date.now(),
+            actions: [
+              {
+                type: "move",
+                actor: "paladin",
+                path: [{ q: 3, r: -2 }, { q: 2, r: -1 }, { q: 1, r: 0 }, { q: 0, r: 1 }]
+              },
+              {
+                type: "skill",
+                actor: "wizard",
+                target: "dragon",
+                data: { skillName: "Lightning Storm" }
+              }
+            ]
+          },
+          {
+            id: "turn-2",
+            timestamp: Date.now() + 3000,
+            actions: [
+              {
+                type: "move",
+                actor: "rogue",
+                path: [{ q: 4, r: -3 }, { q: 3, r: -2 }, { q: 2, r: -1 }, { q: 1, r: -1 }, { q: 0, r: 0 }]
+              },
+              {
+                type: "attack",
+                actor: "dragon",
+                target: "paladin",
+                position: { q: 0, r: 1 }
+              }
+            ]
+          },
+          {
+            id: "turn-3",
+            timestamp: Date.now() + 5000,
+            actions: [
+              {
+                type: "move",
+                actor: "orc1",
+                path: [{ q: -2, r: 3 }, { q: -1, r: 2 }, { q: 0, r: 2 }]
+              },
+              {
+                type: "move",
+                actor: "orc2", 
+                path: [{ q: -4, r: 3 }, { q: -3, r: 3 }, { q: -2, r: 2 }]
+              },
+              {
+                type: "attack",
+                actor: "paladin",
+                target: "dragon"
+              }
+            ]
+          }
+        ]
+      };
+
+      const smallSkirmish = {
+        participants: [
+          {
+            id: "knight",
+            name: "Knight",
+            initialPosition: { q: 2, r: 0 },
+            spriteConfig: { size: { width: 50, height: 50 } }
+          },
+          {
+            id: "goblin",
+            name: "Goblin",
+            initialPosition: { q: -2, r: 0 },
+            spriteConfig: { size: { width: 40, height: 40 } }
+          }
+        ],
+        turns: [
+          {
+            id: "turn-1",
+            timestamp: Date.now(),
+            actions: [
+              {
+                type: "move",
+                actor: "knight",
+                path: [{ q: 2, r: 0 }, { q: 1, r: 0 }, { q: 0, r: 0 }]
+              }
+            ]
+          },
+          {
+            id: "turn-2",
+            timestamp: Date.now() + 2000,
+            actions: [
+              {
+                type: "attack",
+                actor: "knight", 
+                target: "goblin",
+                position: { q: -2, r: 0 }
+              }
+            ]
+          },
+          {
+            id: "turn-3",
+            timestamp: Date.now() + 3000,
+            actions: [
+              {
+                type: "move",
+                actor: "goblin",
+                path: [{ q: -2, r: 0 }, { q: -3, r: 1 }]
+              }
+            ]
+          }
+        ]
+      };
+
+      // Make functions global for button onclick
+      window.loadEpicBattle = () => {
+        const viewer = document.getElementById("cdnViewer");
+        viewer.setBattleData(epicBattle);
+        updateStatus("Epic battle loaded (6 characters)");
+      };
+
+      window.loadSmallSkirmish = () => {
+        const viewer = document.getElementById("cdnViewer");
+        viewer.setBattleData(smallSkirmish);
+        updateStatus("Small skirmish loaded (2 characters)");
+      };
+
+      window.customizeViewer = () => {
+        const viewer = document.getElementById("cdnViewer");
+        viewer.setArenaConfig({
+          radius: 6,
+          tileSize: 38,
+          backgroundColor: 0x1a237e
+        });
+        updateStatus("Arena customized: larger grid, blue theme");
+      };
+
+      let isPlaying = false;
+      window.playBattle = () => {
+        const viewer = document.getElementById("cdnViewer");
+        const playBtn = document.getElementById("playBtn");
+        
+        isPlaying = !isPlaying;
+        viewer.setPlaying(isPlaying);
+        
+        playBtn.textContent = isPlaying ? "⏸️ Pause" : "▶️ Play";
+        updateStatus(isPlaying ? "Battle playing..." : "Battle paused");
+      };
+
+      window.resetBattle = () => {
+        const viewer = document.getElementById("cdnViewer");
+        const playBtn = document.getElementById("playBtn");
+        
+        viewer.reset();
+        isPlaying = false;
+        playBtn.textContent = "▶️ Play";
+        updateStatus("Battle reset to beginning");
+      };
+
+      function updateStatus(message) {
+        document.getElementById("status").textContent = `Status: ${message}`;
+      }
+
+      // Load default battle
+      loadEpicBattle();
+      updateStatus("CDN example initialized successfully");
+    }
+  </script>
+</body>
+</html>

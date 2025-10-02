@@ -3,3 +3,8 @@
  */
 
 export * from "./battle-viewer.js";
+export * from "./types/index.js";
+export * from "./core/battle-arena.js";
+export * from "./core/battle-character.js";
+export * from "./core/battle-orchestrator.js";
+export * from "./utils/hex.js";
