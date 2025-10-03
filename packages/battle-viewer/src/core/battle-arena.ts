@@ -1,12 +1,12 @@
-import {
-  type Application,
-  Assets,
-  Container,
-  Sprite,
-  type Spritesheet,
-  type Texture,
-} from "pixi.js";
-import type { ArenaConfig, AxialCoordinates, BattleParticipant, HexTile } from "../types/index.js";
+import { type Application, Assets, Container, Sprite, type Texture } from "pixi.js";
+import type {
+  ArenaConfig,
+  AxialCoordinates,
+  BattleParticipant,
+  HexTile,
+  TerrainDefinition,
+  TerrainMap,
+} from "../types/index.js";
 import {
   createPixelCoordinatesFactory,
   generateAxialCoordinates,
@@ -15,9 +15,9 @@ import {
 import { BattleCharacter } from "./battle-character.js";
 
 const DEFAULT_TILE_TEXTURES: Record<string, string> = {
-  grass: "hex_grass.png",
-  water: "hex_water.png",
-  mountain: "hex_mountain.png",
+  grass: "hexPlains00.png",
+  water: "hexOcean00.png",
+  mountain: "hexMountain00.png",
 };
 
 export class BattleArena {
@@ -30,8 +30,9 @@ export class BattleArena {
   private tiles = new Map<string, HexTile>();
   private tilesById: HexTile[] = [];
   private characters = new Map<string, BattleCharacter>();
+  private terrainMap: TerrainMap = {};
 
-  private tileSpritesheet: Spritesheet | null = null;
+  private allTextures: Record<string, Texture> = {};
   private getPixelCoordinates: (coords: AxialCoordinates) => { x: number; y: number };
 
   constructor(app: Application, config: ArenaConfig) {
@@ -63,18 +64,54 @@ export class BattleArena {
 
   async initialize(): Promise<void> {
     await this.loadAssets();
+    this.loadTerrainMap();
     this.generateTiles();
     this.renderTiles();
   }
 
   private async loadAssets(): Promise<void> {
-    if (this.config.tileSpritesheet) {
-      try {
-        this.tileSpritesheet = await Assets.load(this.config.tileSpritesheet);
-      } catch (error) {
-        console.warn("Could not load tile spritesheet:", error);
-      }
+    // Reset textures
+    this.allTextures = {};
+
+    // Determine texture source - priority: tileTextures > tileSpritesheets > tileSpritesheet
+    const textureSource =
+      this.config.tileTextures ?? this.config.tileSpritesheets ?? this.config.tileSpritesheet;
+
+    if (!textureSource) {
+      return;
     }
+
+    try {
+      // If textures are already loaded (Record<string, Texture>)
+      if (typeof textureSource === "object" && !Array.isArray(textureSource)) {
+        this.allTextures = textureSource;
+        console.log(
+          `[BattleArena] Using ${Object.keys(this.allTextures).length} pre-loaded textures`
+        );
+        return;
+      }
+
+      // If URLs are provided (string or string[])
+      const urls = Array.isArray(textureSource) ? textureSource : [textureSource];
+
+      // Load all spritesheets
+      const loadedSheets = await Promise.all(urls.map((url) => Assets.load(url)));
+
+      // Merge all textures from all spritesheets into a single lookup
+      for (const sheet of loadedSheets) {
+        Object.assign(this.allTextures, sheet.textures);
+      }
+
+      console.log(
+        `[BattleArena] Loaded ${urls.length} spritesheet(s) with ${Object.keys(this.allTextures).length} total textures`
+      );
+    } catch (error) {
+      console.error("[BattleArena] Could not load tile textures:", error);
+    }
+  }
+
+  private loadTerrainMap(): void {
+    this.terrainMap = this.config.terrainMap || {};
   }
 
   private generateTiles(): void {
@@ -100,21 +137,35 @@ export class BattleArena {
     for (const tile of this.tilesById) {
       let texture: Texture | null = null;
 
-      if (this.tileSpritesheet) {
-        // Resolve texture by explicit name or index, else default by type mapping
-        const namePref = this.config.tileTextureName;
-        if (namePref && this.tileSpritesheet.textures[namePref]) {
-          texture = this.tileSpritesheet.textures[namePref];
-        } else if (
-          typeof this.config.tileTextureIndex === "number" &&
-          this.config.tileTextureIndex >= 0
-        ) {
-          const names = Object.keys(this.tileSpritesheet.textures);
-          const idx = Math.min(this.config.tileTextureIndex, names.length - 1);
-          texture = this.tileSpritesheet.textures[names[idx]] || null;
+      if (Object.keys(this.allTextures).length > 0) {
+        // Check if there's custom terrain for this tile position
+        const terrainKey = hashCoord(tile.position.q, tile.position.r);
+        const terrainDef = this.terrainMap[terrainKey];
+
+        if (terrainDef) {
+          // Use terrain-specific sprite from merged textures
+          texture = this.allTextures[terrainDef.spriteId] || null;
+          if (!texture) {
+            console.warn(
+              `[BattleArena] Texture not found for terrain sprite: ${terrainDef.spriteId}`
+            );
+          }
         } else {
-          const textureName = DEFAULT_TILE_TEXTURES[tile.type];
-          texture = this.tileSpritesheet.textures[textureName] || null;
+          // Use default tile texture
+          const namePref = this.config.tileTextureName;
+          if (namePref && this.allTextures[namePref]) {
+            texture = this.allTextures[namePref];
+          } else if (
+            typeof this.config.tileTextureIndex === "number" &&
+            this.config.tileTextureIndex >= 0
+          ) {
+            const names = Object.keys(this.allTextures);
+            const idx = Math.min(this.config.tileTextureIndex, names.length - 1);
+            texture = this.allTextures[names[idx]] || null;
+          } else {
+            const textureName = DEFAULT_TILE_TEXTURES[tile.type];
+            texture = this.allTextures[textureName] || null;
+          }
         }
       }
 
@@ -181,8 +232,11 @@ export class BattleArena {
     this.tilesById = [];
     this.tilesContainer.removeChildren();
 
-    // Reset spritesheet reference so it gets reloaded if config changes
-    this.tileSpritesheet = null;
+    // Clear terrain map
+    this.terrainMap = {};
+
+    // Reset textures so they get reloaded if config changes
+    this.allTextures = {};
   }
 
   destroy(): void {
@@ -216,6 +270,7 @@ export class BattleArena {
 
     // Reload assets and regenerate tiles with new config
     await this.loadAssets();
+    this.loadTerrainMap();
     this.generateTiles();
     this.renderTiles();
   }
@@ -227,5 +282,35 @@ export class BattleArena {
 
   getAllTiles(): HexTile[] {
     return [...this.tilesById];
+  }
+
+  /**
+   * Get terrain definition at specific coordinates
+   */
+  getTerrainAt(coords: AxialCoordinates): TerrainDefinition | null {
+    const terrainKey = hashCoord(coords.q, coords.r);
+    return this.terrainMap[terrainKey] || null;
+  }
+
+  /**
+   * Get all terrain definitions
+   */
+  getAllTerrain(): TerrainMap {
+    return { ...this.terrainMap };
+  }
+
+  /**
+   * Check if a position has custom terrain (not default)
+   */
+  hasCustomTerrainAt(coords: AxialCoordinates): boolean {
+    return this.getTerrainAt(coords) !== null;
+  }
+
+  /**
+   * Check if a position is passable (no blocking terrain)
+   */
+  isPassable(coords: AxialCoordinates): boolean {
+    const terrain = this.getTerrainAt(coords);
+    return terrain === null || terrain.properties?.passable !== false;
   }
 }

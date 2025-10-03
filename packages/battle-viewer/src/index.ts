@@ -8,3 +8,6 @@ export * from "./core/battle-arena.js";
 export * from "./core/battle-character.js";
 export * from "./core/battle-orchestrator.js";
 export * from "./utils/hex.js";
+
+// Re-export PixiJS Assets for convenience
+export { Assets } from "pixi.js";

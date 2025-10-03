@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hexagonal Battle Example - Pre-loaded Assets</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    battle-viewer {
+      width: 100%;
+      height: 600px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #218838;
+    }
+    
+    button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .play-controls button {
+      background: #007bff;
+    }
+    
+    .play-controls button:hover {
+      background: #0056b3;
+    }
+    
+    .info {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+      font-family: monospace;
+    }
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "pixi.js": "https://esm.sh/pixi.js@8",
+        "@florelabs/battle-viewer": "../dist/index.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Hexagonal Battle Example - Pre-loaded Assets</h1>
+    <p>This example demonstrates loading assets manually with full control over the loading process.</p>
+    
+    <battle-viewer id="hexViewer"></battle-viewer>
+    
+    <div class="controls">
+      <button onclick="loadHexBattle()">Load Hex Battle (Lush Valley)</button>
+    </div>
+    
+    <div class="play-controls controls">
+      <button onclick="playBattle()">▶️ Play</button>
+      <button onclick="pauseBattle()">⏸️ Pause</button>
+      <button onclick="resetBattle()">⏹️ Reset</button>
+    </div>
+    
+    <div class="info" id="battleInfo">
+      Battle Status: Ready to load
+    </div>
+  </div>
+
+  <script type="module">
+    // Import from the built library
+    import { Assets } from "@florelabs/battle-viewer";
+    import "@florelabs/battle-viewer";
+    import { createLushValleyTerrain } from "./terrain-presets.js";
+
+    // Battle data
+    const hexBattle = {
+      participants: [
+        {
+          id: "p1",
+          name: "Knight",
+          initialPosition: { q: 1, r: 2 },
+          spriteConfig: {
+            spritesheet: "./atlases/stickman-fighter.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "fighter_Idle",
+              run: "fighter_run",
+              attack: "fighter_combo",
+              hit: "fighter_hit"
+            },
+            facingConfig: {
+              defaultFacing: "right",
+              allowMirroring: true,
+            }
+          },
+          weaponId: 1
+        },
+        {
+          id: "p2",
+          name: "Archer",
+          initialPosition: { q: -2, r: 1 },
+          spriteConfig: {
+            spritesheet: "./atlases/stickman-fighter-sword.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "sword_Idle",
+              run: "sword_run",
+              attack: "sword_combo",
+              hit: "sword_hit"
+            }
+          },
+          weaponId: 2
+        },
+        {
+          id: "e1",
+          name: "Orc",
+          initialPosition: { q: -1, r: -2 },
+          spriteConfig: {
+            spritesheet: "./atlases/stickman-fighter-pistol.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "pistol_Idle",
+              run: "pistol_run",
+              attack: "pistol_shot",
+              hit: "pistol_hit"
+            }
+          },
+          weaponId: 0
+        }
+      ],
+      turns: [
+        {
+          id: "turn-1",
+          timestamp: Date.now(),
+          actions: [
+            {
+              type: "move",
+              actor: "p1",
+              path: [
+                { q: 0, r: 2 },
+                { q: -1, r: 2 },
+                { q: -1, r: 1 }
+              ]
+            }
+          ]
+        },
+        {
+          id: "turn-2", 
+          timestamp: Date.now() + 2000,
+          actions: [
+            {
+              type: "attack",
+              actor: "p1",
+              target: "p2",
+              position: { q: -1, r: -2 }
+            }
+          ]
+        }
+      ]
+    };
+
+    const loadAsset = async (url) => {
+        try {
+            const sheet = await Assets.load(url);
+            return sheet
+        } catch (error) {
+            console.error('Full error:', error);
+            throw error;
+        }
+    };
+
+    // Global functions for buttons
+    window.loadHexBattle = async () => {
+      updateInfo("Loading terrain assets...");
+      
+      try {
+
+        const sheets = await Promise.all(["./atlases/hex_terrain-0.json", "./atlases/hex_terrain-1.json"].map(loadAsset));
+        // Merge textures from both sheets
+        const tileTextures = {
+          ...sheets[0].textures,
+          ...sheets[1].textures
+        };
+        
+        updateInfo(`Loaded ${Object.keys(tileTextures).length} terrain textures`);
+        console.log("[Debug] Sample textures:", Object.keys(tileTextures).slice(0, 10).join(", "));
+        
+        // Configure arena with pre-loaded textures
+        const viewer = document.getElementById("hexViewer");
+        const radius = 5;
+        viewer.setArenaConfig({
+          radius,
+          tileSize: 32,
+          backgroundColor: 0x1a472a,
+          // Pass pre-loaded textures directly - no URL resolution issues!
+          tileTextures: tileTextures,
+          tileTextureName: "hexJungle00.png",
+          terrainMap: createLushValleyTerrain()
+        });
+        
+        viewer.setBattleData(hexBattle);
+        updateInfo("Hex battle loaded with pre-loaded terrain textures!");
+        console.log("[Debug] Battle setup complete!");
+      } catch (error) {
+        updateInfo(`Error loading assets: ${error.message}`);
+        console.error("[Debug] Asset loading error:", error);
+        console.error("[Debug] Error stack:", error.stack);
+      }
+    };
+
+    window.playBattle = () => {
+      const viewer = document.getElementById("hexViewer");
+      viewer.setPlaying(true);
+      updateInfo("Battle playing...");
+    };
+
+    window.pauseBattle = () => {
+      const viewer = document.getElementById("hexViewer");
+      viewer.setPlaying(false);
+      updateInfo("Battle paused");
+    };
+
+    window.resetBattle = () => {
+      const viewer = document.getElementById("hexViewer");
+      viewer.reset();
+      updateInfo("Battle reset");
+    };
+
+    function updateInfo(message) {
+      document.getElementById("battleInfo").textContent = `Battle Status: ${message}`;
+    }
+
+    // Auto-load on page load
+    window.addEventListener("load", () => {
+      setTimeout(loadHexBattle, 100);
+    });
+  </script>
+</body>
+</html>

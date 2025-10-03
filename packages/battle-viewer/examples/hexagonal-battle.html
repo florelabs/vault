@@ -86,8 +86,8 @@
     <battle-viewer id="hexViewer"></battle-viewer>
     
     <div class="controls">
-      <button onclick="loadHexBattle()">Load Hex Battle</button>
-      <button onclick="loadLargeBattle()">Load Large Battle</button>
+      <button onclick="loadHexBattle()">Load Hex Battle (Lush Valley)</button>
+      <button onclick="loadLargeBattle()">Load Large Battle (Tactical Outpost)</button>
     </div>
     
     <div class="play-controls controls">
@@ -103,7 +103,10 @@
 
   <script type="module">
     // Import the web component from source (development) or dist (production)
+    import { Assets } from "@florelabs/battle-viewer";
     import "@florelabs/battle-viewer";
+    // Import terrain presets for examples
+    import { createLushValleyTerrain, createTacticalOutpostTerrain } from "./terrain-presets.js";
 
     // Hexagonal battle data
     const hexBattle = {
@@ -113,7 +116,7 @@
           name: "Knight",
           initialPosition: { q: 1, r: 2 },
           spriteConfig: {
-            spritesheet: "/atlases/stickman-fighter.json",
+            spritesheet: "./atlases/stickman-fighter.json",
             size: { width: 128, height: 128 },
             anchor: { x: 0.5, y: 0.7 },
             animationMap: {
@@ -134,7 +137,7 @@
           name: "Archer",
           initialPosition: { q: -2, r: 1 },
           spriteConfig: {
-            spritesheet: "/atlases/stickman-fighter-sword.json",
+            spritesheet: "./atlases/stickman-fighter-sword.json",
             size: { width: 128, height: 128 },
             anchor: { x: 0.5, y: 0.7 },
             animationMap: {
@@ -151,7 +154,7 @@
           name: "Orc",
           initialPosition: { q: -1, r: -2 },
           spriteConfig: {
-            spritesheet: "/atlases/stickman-fighter-pistol.json",
+            spritesheet: "./atlases/stickman-fighter-pistol.json",
             size: { width: 128, height: 128 },
             anchor: { x: 0.5, y: 0.7 },
             animationMap: {
@@ -249,7 +252,7 @@
           name: "Knight",
           initialPosition: { q: 4, r: 3 },
           spriteConfig: {
-            spritesheet: "/atlases/stickman-fighter-sword.json",
+            spritesheet: "./atlases/stickman-fighter-sword.json",
             size: { width: 128, height: 128 },
             anchor: { x: 0.5, y: 0.7 },
             animationMap: {
@@ -270,7 +273,7 @@
           name: "Archer",
           initialPosition: { q: -4, r: -3 },
           spriteConfig: {
-            spritesheet: "/atlases/stickman-fighter-sword.json",
+            spritesheet: "./atlases/stickman-fighter-sword.json",
             size: { width: 128, height: 128 },
             anchor: { x: 0.5, y: 0.7 },
             animationMap: {
@@ -287,7 +290,7 @@
           name: "Orc",
           initialPosition: { q: -6, r: 3 },
           spriteConfig: {
-            spritesheet: "/atlases/stickman-fighter-pistol.json",
+            spritesheet: "./atlases/stickman-fighter-pistol.json",
             size: { width: 128, height: 128 },
             anchor: { x: 0.5, y: 0.7 },
             animationMap: {
@@ -304,7 +307,7 @@
           name: "Mage",
           initialPosition: { q: 6, r: -6 },
           spriteConfig: {
-            spritesheet: "/atlases/stickman-fighter-pistol.json",
+            spritesheet: "./atlases/stickman-fighter-pistol.json",
             size: { width: 128, height: 128 },
             anchor: { x: 0.5, y: 0.7 },
             animationMap: {
@@ -320,37 +323,57 @@
       turns: []
     };
 
+    let tileTextures = {}
 
-    // Global functions for buttons
-    window.loadHexBattle = () => {
-      const viewer = document.getElementById("hexViewer");
-      viewer.setArenaConfig({
-        radius: 5,
-        tileSize: 32,
-        backgroundColor: 0x1a472a,
-        tileSpritesheet: "/atlases/hex_tiles.json",
-        // Choose the tile texture either by name or by index
-        tileTextureName: "hex_grass.png"
-        // Or alternatively: tileTextureIndex: 0
-      });
-      viewer.setBattleData(hexBattle);
-      updateInfo("Hex battle loaded");
+    const loadAsset = async (url) => {
+      try {
+          const sheet = await Assets.load(url);
+          return sheet
+      } catch (error) {
+          console.error('Full error:', error);
+          throw error;
+      }
     };
 
-    window.loadLargeBattle = () => {
+
+    // Global functions for buttons
+    window.loadHexBattle = async () => {
       const viewer = document.getElementById("hexViewer");
+      const radius = 5;
       viewer.setArenaConfig({
-        radius: 8,
+        radius,
+        tileSize: 32,
+        backgroundColor: 0x1a472a,
+        // Load both atlas files to support multipack terrain (using relative paths)
+        tileSpritesheets: [
+          "./atlases/hex_terrain-0.json",
+          "./atlases/hex_terrain-1.json"
+        ],
+        tileTextures,
+        tileTextureName: "hexJungle00.png",
+        // Use the Lush Valley terrain preset
+        terrainMap: createLushValleyTerrain()
+      });
+      viewer.setBattleData(hexBattle);
+      updateInfo("Hex battle loaded with Lush Valley terrain (rivers, forests, mountains, deserts)");
+    };
+
+    window.loadLargeBattle = async () => {
+      const viewer = document.getElementById("hexViewer");
+      const radius = 8;
+      viewer.setArenaConfig({
+        radius,
         tileSize: 24,
         backgroundColor: 0x2c5aa0,
-        tileSpritesheet: "/atlases/hex_tiles.json",
-        // Choose the tile texture either by name or by index
-        tileTextureName: "hex_grass.png"
+        // Load both atlas files for consistency (using relative paths)
+        tileTextures,
+        tileTextureName: "hexPlains00.png",
+        // No custom terrain - all default plains
+        terrainMap: createTacticalOutpostTerrain()
       });
       viewer.setBattleData(largeBattle);
-      updateInfo("Large battle loaded");
-
-    }
+      updateInfo("Large battle loaded with plain terrain");
+    };
 
     window.customizeArena = () => {
       const viewer = document.getElementById("hexViewer");
@@ -380,9 +403,15 @@
     }
 
     // Auto-load on page load
-    window.addEventListener("load", () => {
+    window.addEventListener("load", async () => {
       // Set initial arena config, including tiles atlas provided by client
       const viewer = document.getElementById("hexViewer");
+      const sheets = await Promise.all(["./atlases/hex_terrain-0.json", "./atlases/hex_terrain-1.json"].map(loadAsset));
+      // Merge textures from both sheets
+      tileTextures = {
+        ...sheets[0].textures,
+        ...sheets[1].textures
+      };
       loadHexBattle();
     });
   </script>

@@ -1,0 +1,1096 @@
+{
+  "frames": {
+    "hexJungle00.png": {
+      "frame": {
+        "x": 3,
+        "y": 3,
+        "w": 256,
+        "h": 274
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 110,
+        "w": 256,
+        "h": 274
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "snowField00.png": {
+      "frame": {
+        "x": 265,
+        "y": 3,
+        "w": 256,
+        "h": 274
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 110,
+        "w": 256,
+        "h": 274
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "plainsFarm00.png": {
+      "frame": {
+        "x": 3,
+        "y": 283,
+        "w": 256,
+        "h": 274
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 110,
+        "w": 256,
+        "h": 274
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexDirtVillage00.png": {
+      "frame": {
+        "x": 265,
+        "y": 283,
+        "w": 256,
+        "h": 273
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 111,
+        "w": 256,
+        "h": 273
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexPlainsFarm00.png": {
+      "frame": {
+        "x": 527,
+        "y": 3,
+        "w": 256,
+        "h": 273
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 111,
+        "w": 256,
+        "h": 273
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexForestBurnedDirt00.png": {
+      "frame": {
+        "x": 527,
+        "y": 282,
+        "w": 256,
+        "h": 273
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 111,
+        "w": 256,
+        "h": 273
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "desertDunes00.png": {
+      "frame": {
+        "x": 527,
+        "y": 561,
+        "w": 256,
+        "h": 273
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 111,
+        "w": 256,
+        "h": 273
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "desertOasis00.png": {
+      "frame": {
+        "x": 265,
+        "y": 562,
+        "w": 256,
+        "h": 273
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 111,
+        "w": 256,
+        "h": 273
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "lavaField00.png": {
+      "frame": {
+        "x": 3,
+        "y": 563,
+        "w": 256,
+        "h": 273
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 111,
+        "w": 256,
+        "h": 273
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexSandPalms00.png": {
+      "frame": {
+        "x": 789,
+        "y": 3,
+        "w": 256,
+        "h": 271
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 113,
+        "w": 256,
+        "h": 271
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "marsh00.png": {
+      "frame": {
+        "x": 789,
+        "y": 280,
+        "w": 256,
+        "h": 271
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 113,
+        "w": 256,
+        "h": 271
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexWoodlands00.png": {
+      "frame": {
+        "x": 789,
+        "y": 557,
+        "w": 256,
+        "h": 270
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 114,
+        "w": 256,
+        "h": 270
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "plains00.png": {
+      "frame": {
+        "x": 789,
+        "y": 833,
+        "w": 256,
+        "h": 270
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 114,
+        "w": 256,
+        "h": 270
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "plainsColdSnowTransition00.png": {
+      "frame": {
+        "x": 527,
+        "y": 840,
+        "w": 256,
+        "h": 270
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 114,
+        "w": 256,
+        "h": 270
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "tropicalPlains00.png": {
+      "frame": {
+        "x": 265,
+        "y": 841,
+        "w": 256,
+        "h": 269
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 115,
+        "w": 256,
+        "h": 269
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ashPlains00.png": {
+      "frame": {
+        "x": 3,
+        "y": 842,
+        "w": 256,
+        "h": 268
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 116,
+        "w": 256,
+        "h": 268
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bog00.png": {
+      "frame": {
+        "x": 1051,
+        "y": 3,
+        "w": 256,
+        "h": 267
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 117,
+        "w": 256,
+        "h": 267
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "wetlands00.png": {
+      "frame": {
+        "x": 1051,
+        "y": 276,
+        "w": 256,
+        "h": 267
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 117,
+        "w": 256,
+        "h": 267
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "scrubland00.png": {
+      "frame": {
+        "x": 1051,
+        "y": 549,
+        "w": 256,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 118,
+        "w": 256,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "desertRedDirt00.png": {
+      "frame": {
+        "x": 1051,
+        "y": 821,
+        "w": 256,
+        "h": 264
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 120,
+        "w": 256,
+        "h": 264
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexMarsh00.png": {
+      "frame": {
+        "x": 1051,
+        "y": 1091,
+        "w": 256,
+        "h": 262
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 122,
+        "w": 256,
+        "h": 262
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexSnowField00.png": {
+      "frame": {
+        "x": 789,
+        "y": 1109,
+        "w": 256,
+        "h": 262
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 122,
+        "w": 256,
+        "h": 262
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexPlains00.png": {
+      "frame": {
+        "x": 3,
+        "y": 1116,
+        "w": 256,
+        "h": 261
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 123,
+        "w": 256,
+        "h": 261
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexScrublands00.png": {
+      "frame": {
+        "x": 265,
+        "y": 1116,
+        "w": 256,
+        "h": 259
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 125,
+        "w": 256,
+        "h": 259
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexDesertRedGrass00.png": {
+      "frame": {
+        "x": 527,
+        "y": 1116,
+        "w": 256,
+        "h": 259
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 125,
+        "w": 256,
+        "h": 259
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexAshPlains00.png": {
+      "frame": {
+        "x": 1313,
+        "y": 3,
+        "w": 256,
+        "h": 259
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 125,
+        "w": 256,
+        "h": 259
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexLavaField00.png": {
+      "frame": {
+        "x": 1313,
+        "y": 268,
+        "w": 256,
+        "h": 259
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 125,
+        "w": 256,
+        "h": 259
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexDesertDunes00.png": {
+      "frame": {
+        "x": 1313,
+        "y": 533,
+        "w": 256,
+        "h": 258
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 126,
+        "w": 256,
+        "h": 258
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexDirt00.png": {
+      "frame": {
+        "x": 1313,
+        "y": 797,
+        "w": 256,
+        "h": 258
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 126,
+        "w": 256,
+        "h": 258
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexHighlands00.png": {
+      "frame": {
+        "x": 1313,
+        "y": 1061,
+        "w": 256,
+        "h": 258
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 126,
+        "w": 256,
+        "h": 258
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexDesertYellowHillsOasis00.png": {
+      "frame": {
+        "x": 1313,
+        "y": 1325,
+        "w": 256,
+        "h": 258
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 126,
+        "w": 256,
+        "h": 258
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexDesertDunesOasis00.png": {
+      "frame": {
+        "x": 1051,
+        "y": 1359,
+        "w": 256,
+        "h": 258
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 126,
+        "w": 256,
+        "h": 258
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexBog00.png": {
+      "frame": {
+        "x": 789,
+        "y": 1377,
+        "w": 256,
+        "h": 258
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 126,
+        "w": 256,
+        "h": 258
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexDesertRedDirt00.png": {
+      "frame": {
+        "x": 3,
+        "y": 1383,
+        "w": 256,
+        "h": 257
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 127,
+        "w": 256,
+        "h": 257
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexWetlands00.png": {
+      "frame": {
+        "x": 265,
+        "y": 1381,
+        "w": 256,
+        "h": 257
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 127,
+        "w": 256,
+        "h": 257
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexBase00.png": {
+      "frame": {
+        "x": 527,
+        "y": 1381,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 128,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexOcean00.png": {
+      "frame": {
+        "x": 1575,
+        "y": 3,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 128,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexOceanCalm00.png": {
+      "frame": {
+        "x": 1575,
+        "y": 265,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 128,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "hexRiver001010-01.png": {
+      "frame": {
+        "x": 1575,
+        "y": 527,
+        "w": 256,
+        "h": 231
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 129,
+        "w": 256,
+        "h": 231
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "base00.png": {
+      "frame": {
+        "x": 1575,
+        "y": 764,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 128,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "below_water00.png": {
+      "frame": {
+        "x": 1575,
+        "y": 1026,
+        "w": 256,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 128
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "ocean00.png": {
+      "frame": {
+        "x": 1575,
+        "y": 1160,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 128,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "void00.png": {
+      "frame": {
+        "x": 1575,
+        "y": 1422,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 128,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "dirtCold00.png": {
+      "frame": {
+        "x": 1313,
+        "y": 1589,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 128,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "oceanCalm00.png": {
+      "frame": {
+        "x": 1051,
+        "y": 1623,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 128,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 384
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://github.com/odrick/free-tex-packer-core",
+    "version": "0.3.5",
+    "image": "hex_terrain-1.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": 1
+  },
+  "animations": {}
+}

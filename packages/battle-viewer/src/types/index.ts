@@ -1,3 +1,5 @@
+import type { Texture } from "pixi.js";
+
 /**
  * Core types for battle-viewer
  */
@@ -39,19 +41,75 @@ export interface CharacterFacingConfig {
   allowMirroring?: boolean;
 }
 
+/**
+ * Tile textures can be provided as:
+ * - Record<string, Texture>: Pre-loaded textures (recommended for full control)
+ * - string: URL to a spritesheet JSON
+ * - string[]: Array of URLs to spritesheet JSONs (for multipacks)
+ */
+export type TileTextureSource = Record<string, Texture> | string | string[];
+
 export interface ArenaConfig {
   radius: number;
   tileSize: number;
   backgroundColor: number;
   viewportWidth?: number;
   viewportHeight?: number;
+  /** @deprecated Use tileTextures instead for better control */
   tileSpritesheet?: string;
-  /** Name of the default tile texture in the tiles atlas (e.g., "hex_grass.png") */
+  /** @deprecated Use tileTextures instead for better control */
+  tileSpritesheets?: string[];
+  /** Tile textures - can be pre-loaded Texture map or URL(s) to load */
+  tileTextures?: TileTextureSource;
+  /** Name of the default tile texture in the tiles atlas (e.g., "hexPlains00.png") */
   tileTextureName?: string;
   /** Index of the default tile texture in the tiles atlas (fallback if name not provided) */
   tileTextureIndex?: number;
+  /** Terrain map defining what terrain type each hex should use */
+  terrainMap?: TerrainMap;
 }
 
+/**
+ * Terrain map that defines the terrain type for specific coordinates
+ * If a coordinate is not specified, the default tile texture is used
+ */
+export interface TerrainMap {
+  /** Map of coordinate string (e.g., "1,2") to terrain definition */
+  [coordinateKey: string]: TerrainDefinition;
+}
+
+/**
+ * Definition of terrain at a specific hex position
+ */
+export interface TerrainDefinition {
+  /** Type of terrain (e.g., "forest", "mountain", "water") */
+  type: string;
+  /** Specific sprite texture name from the atlas (e.g., "hexForestPine00.png") */
+  spriteId: string;
+  /** Optional properties for terrain behavior */
+  properties?: TerrainProperties;
+}
+
+/**
+ * Properties that define how terrain behaves
+ */
+export interface TerrainProperties {
+  /** Whether characters can move through this terrain */
+  passable?: boolean;
+  /** Whether projectiles can pass through this terrain */
+  blocksProjectiles?: boolean;
+  /** Whether this terrain blocks line of sight */
+  blocksVision?: boolean;
+  /** Movement cost multiplier for pathfinding */
+  movementCost?: number;
+  /** Custom properties for specific terrain types */
+  [key: string]: unknown;
+}
+
+/**
+ * Character sprite configuration.
+ * spritesheet can be either a URL string or a pre-loaded Spritesheet object
+ */
 export interface SpriteConfig {
   spritesheet: string;
   animations?: AnimationConfig;

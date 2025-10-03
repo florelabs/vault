@@ -13,6 +13,7 @@ Auto-battle visualizer using PixiJS, packaged as a Web Component with hexagonal 
 - 🗺️ Hexagonal coordinate system (axial coordinates)
 - 🎭 Character animations and movement
 - ↔️ Automatic character facing direction based on actions
+- 🏔️ Obstacle system with terrain features and strategic elements
 - ⚔️ Battle orchestration with turn-based actions
 
 ## Installation
@@ -279,6 +280,107 @@ const coords = generateAxialCoordinates(3);
 const pixel = axialToPixel({ q: 1, r: -1 }, 32 /* tileSize */);
 ```
 
+## Obstacle System
+
+The battle viewer supports a comprehensive obstacle system for creating strategic terrain features.
+
+### Basic Obstacle Configuration
+
+```javascript
+const arenaConfig = {
+  radius: 5,
+  tileSize: 32,
+  backgroundColor: 0x1a472a,
+  tileSpritesheet: "./atlases/hex_tiles.json",
+  tileTextureName: "hex_grass.png",
+  obstacles: [
+    {
+      id: "water_center",
+      position: { q: 0, r: 1 },
+      type: "water",
+      spriteId: "hex_water.png",
+      properties: {
+        passable: false,
+        blocksProjectiles: false,
+        blocksVision: false
+      }
+    },
+    {
+      id: "rock_north",
+      position: { q: 0, r: -2 },
+      type: "rock",
+      spriteId: "hex_grass_sloped_high.png",
+      properties: {
+        passable: false,
+        blocksProjectiles: true,
+        blocksVision: true
+      }
+    }
+  ]
+};
+```
+
+### Predefined Obstacle Sets
+
+```javascript
+import { getObstaclesForRadius, SMALL_ARENA_OBSTACLES, MEDIUM_ARENA_OBSTACLES, LARGE_ARENA_OBSTACLES } from "@florelabs/battle-viewer";
+
+// Automatic obstacle selection based on arena size
+const obstacles = getObstaclesForRadius(5); // Returns appropriate preset
+
+// Or use specific presets
+const config = {
+  radius: 5,
+  obstacles: MEDIUM_ARENA_OBSTACLES // River crossing with strategic rocks
+};
+```
+
+### Available Obstacle Types
+
+The system includes sprites from the `hex_tiles.json` atlas:
+
+- **Water**: `hex_water.png` - Impassable water tiles
+- **Rivers**: `hex_river_A.png` to `hex_river_L.png` - Flowing water sections
+- **Roads**: `hex_road_A.png` to `hex_road_M.png` - Passable road networks
+- **Hills**: `hex_grass_sloped_high.png` - Elevated terrain that blocks movement and vision
+- **Coasts**: `hex_coast_A.png` to `hex_coast_E.png` - Water-land transitions
+- **Crossings**: `hex_river_crossing_A.png` - Bridges and fords
+
+### Obstacle Properties
+
+Each obstacle can have behavioral properties:
+
+```javascript
+const obstacle = {
+  id: "strategic_hill",
+  position: { q: 2, r: -1 },
+  type: "hill",
+  spriteId: "hex_grass_sloped_high.png",
+  properties: {
+    passable: false,          // Can characters move through?
+    blocksProjectiles: true,  // Do projectiles hit this obstacle?
+    blocksVision: true,       // Does this block line of sight?
+    // Custom properties for game logic
+    coverBonus: 2,
+    climbCost: 3
+  }
+};
+```
+
+### Arena Obstacle Methods
+
+```javascript
+const arena = viewer.getArena();
+
+// Query obstacles
+const obstacle = arena.getObstacleAt({ q: 0, r: 1 });
+const allObstacles = arena.getAllObstacles();
+const hasObstacle = arena.hasObstacleAt({ q: 2, r: 0 });
+
+// Check movement
+const isPassable = arena.isPassable({ q: 1, r: 1 });
+```
+
 ## Advanced Usage
 
 ### Custom Arena Integration
@@ -309,9 +411,10 @@ await character.moveToPosition({ x: 100, y: 100 });
 
 See the `examples/` directory for:
 - `basic-usage.html` - Simple battle setup
-- `hexagonal-battle.html` - Advanced hexagonal combat with controls
+- `hexagonal-battle.html` - Advanced hexagonal combat with controls and obstacles
 - `facing-direction-demo.html` - Character facing direction demonstration
 - `center-facing-demo.html` - Characters facing towards center demonstration
+- `obstacles-demo.html` - Comprehensive obstacle system showcase
 
 ## Browser Support
 

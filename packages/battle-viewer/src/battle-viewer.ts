@@ -149,8 +149,11 @@ export class BattleViewer extends HTMLElement {
         radius: this.arenaConfig.radius,
         backgroundColor: this.arenaConfig.backgroundColor,
         tileSpritesheet: this.arenaConfig.tileSpritesheet,
+        tileSpritesheets: this.arenaConfig.tileSpritesheets,
+        tileTextures: this.arenaConfig.tileTextures,
         tileTextureName: this.arenaConfig.tileTextureName,
         tileTextureIndex: this.arenaConfig.tileTextureIndex,
+        terrainMap: this.arenaConfig.terrainMap,
       });
 
       // Reinitialize with the new configuration
@@ -216,7 +219,7 @@ export class BattleViewer extends HTMLElement {
     this.arenaConfig = { ...this.arenaConfig, ...config };
 
     // Update the Pixi app background color if it changed
-    if (this.app && config.backgroundColor !== undefined) {
+    if (this.app?.renderer?.background && config.backgroundColor !== undefined) {
       this.app.renderer.background.color = config.backgroundColor;
     }
 

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Loading Debug Tool</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    
+    .container {
+      background: #252526;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #4ec9b0;
+      margin-top: 0;
+    }
+    
+    h2 {
+      color: #4fc1ff;
+      border-bottom: 1px solid #3e3e42;
+      padding-bottom: 10px;
+    }
+    
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #1e1e1e;
+      border-left: 4px solid #007acc;
+    }
+    
+    button {
+      background: #0e639c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+      font-family: inherit;
+    }
+    
+    button:hover {
+      background: #1177bb;
+    }
+    
+    button.success {
+      background: #0e7e0e;
+    }
+    
+    button.error {
+      background: #c73030;
+    }
+    
+    .log {
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+      max-height: 400px;
+      overflow-y: auto;
+      font-size: 12px;
+      border: 1px solid #3e3e42;
+    }
+    
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+    }
+    
+    .log-info { color: #4fc1ff; }
+    .log-success { color: #89d185; }
+    .log-error { color: #f48771; }
+    .log-warn { color: #dcdcaa; }
+    
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 3px;
+      margin-left: 10px;
+      font-size: 12px;
+    }
+    
+    .status.pending { background: #6c757d; }
+    .status.loading { background: #007acc; }
+    .status.success { background: #0e7e0e; }
+    .status.error { background: #c73030; }
+    
+    pre {
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      border: 1px solid #3e3e42;
+    }
+    
+    .texture-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .texture-item {
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      border: 1px solid #3e3e42;
+    }
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "pixi.js": "https://esm.sh/pixi.js@8"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Asset Loading Debug Tool</h1>
+    <p>Test and debug asset loading for battle-viewer</p>
+  </div>
+
+  <div class="container">
+    <h2>Test 1: Detect Current Base URL</h2>
+    <div class="test-section">
+      <p>Current page URL: <code id="currentUrl"></code></p>
+      <p>Base directory: <code id="baseDir"></code></p>
+      <p>Expected atlases location: <code id="atlasesPath"></code></p>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Test 2: Test Different URL Patterns</h2>
+    <div class="test-section">
+      <button onclick="testUrl('/atlases/hex_terrain-0.json')">Test Absolute: /atlases/...</button>
+      <button onclick="testUrl('./atlases/hex_terrain-0.json')">Test Relative: ./atlases/...</button>
+      <button onclick="testUrl('atlases/hex_terrain-0.json')">Test No Prefix: atlases/...</button>
+      <button onclick="testUrl('../examples/atlases/hex_terrain-0.json')">Test Parent: ../examples/atlases/...</button>
+      <div id="urlTestResults" class="log"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Test 3: Load Assets with PixiJS Assets</h2>
+    <div class="test-section">
+      <button onclick="loadWithPixi('./atlases/hex_terrain-0.json')">Load hex_terrain-0 (relative)</button>
+      <button onclick="loadWithPixi('./atlases/hex_terrain-1.json')">Load hex_terrain-1 (relative)</button>
+      <button onclick="loadMultiplePack()">Load Both (multipack)</button>
+      <button onclick="clearCache()">Clear Cache</button>
+      <div id="pixiLoadResults" class="log"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Test 4: Loaded Textures Inspection</h2>
+    <div class="test-section">
+      <button onclick="inspectTextures()">Inspect Loaded Textures</button>
+      <div id="textureInspection" class="log"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Test 5: Verify Atlas Files Exist</h2>
+    <div class="test-section">
+      <button onclick="verifyFiles()">Check File Existence</button>
+      <div id="fileVerification" class="log"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Assets } from "pixi.js";
+
+    // Store loaded assets
+    window.loadedAssets = {};
+    
+    // Initialize
+    window.addEventListener("load", () => {
+      document.getElementById("currentUrl").textContent = window.location.href;
+      document.getElementById("baseDir").textContent = window.location.pathname.replace(/\/[^/]*$/, '/');
+      document.getElementById("atlasesPath").textContent = new URL('./atlases/', window.location.href).href;
+    });
+
+    function log(element, message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      document.getElementById(element).appendChild(entry);
+      document.getElementById(element).scrollTop = document.getElementById(element).scrollHeight;
+    }
+
+    window.testUrl = async (url) => {
+      const results = document.getElementById('urlTestResults');
+      log('urlTestResults', `Testing URL: ${url}`, 'info');
+      
+      try {
+        const resolved = new URL(url, window.location.href);
+        log('urlTestResults', `✓ Resolved to: ${resolved.href}`, 'success');
+        
+        // Try to fetch
+        const response = await fetch(resolved.href);
+        if (response.ok) {
+          log('urlTestResults', `✓ File exists and is accessible (${response.status})`, 'success');
+          const contentType = response.headers.get('content-type');
+          log('urlTestResults', `  Content-Type: ${contentType}`, 'info');
+        } else {
+          log('urlTestResults', `✗ File not accessible (${response.status} ${response.statusText})`, 'error');
+        }
+      } catch (error) {
+        log('urlTestResults', `✗ Error: ${error.message}`, 'error');
+      }
+    };
+
+    window.loadWithPixi = async (url) => {
+      log('pixiLoadResults', `Loading with PixiJS Assets: ${url}`, 'info');
+      
+      try {
+        log('pixiLoadResults', `Calling Assets.load("${url}")...`, 'info');
+        const sheet = await Assets.load(url);
+        
+        log('pixiLoadResults', `✓ Successfully loaded!`, 'success');
+        log('pixiLoadResults', `  Textures: ${Object.keys(sheet.textures).length}`, 'info');
+        log('pixiLoadResults', `  Sample textures: ${Object.keys(sheet.textures).slice(0, 5).join(', ')}...`, 'info');
+        
+        window.loadedAssets[url] = sheet;
+        return sheet;
+      } catch (error) {
+        log('pixiLoadResults', `✗ Failed to load: ${error.message}`, 'error');
+        console.error('Full error:', error);
+        throw error;
+      }
+    };
+
+    window.loadMultiplePack = async () => {
+      log('pixiLoadResults', `Loading multipack (both atlases)...`, 'info');
+      
+      try {
+        const urls = [
+          './atlases/hex_terrain-0.json',
+          './atlases/hex_terrain-1.json'
+        ];
+        
+        log('pixiLoadResults', `Loading ${urls.length} spritesheets in parallel...`, 'info');
+        
+        const sheets = await Promise.all(
+          urls.map(url => loadWithPixi(url))
+        );
+        
+        // Merge textures
+        const merged = {};
+        for (const sheet of sheets) {
+          Object.assign(merged, sheet.textures);
+        }
+        
+        log('pixiLoadResults', `✓ Multipack loaded successfully!`, 'success');
+        log('pixiLoadResults', `  Total textures: ${Object.keys(merged).length}`, 'info');
+        
+        window.loadedAssets['merged'] = { textures: merged };
+      } catch (error) {
+        log('pixiLoadResults', `✗ Multipack loading failed: ${error.message}`, 'error');
+      }
+    };
+
+    window.clearCache = () => {
+      Assets.cache.reset();
+      window.loadedAssets = {};
+      log('pixiLoadResults', 'Cache cleared', 'warn');
+    };
+
+    window.inspectTextures = () => {
+      const div = document.getElementById('textureInspection');
+      div.innerHTML = '';
+      
+      if (Object.keys(window.loadedAssets).length === 0) {
+        log('textureInspection', 'No assets loaded yet. Load some first!', 'warn');
+        return;
+      }
+      
+      for (const [url, asset] of Object.entries(window.loadedAssets)) {
+        log('textureInspection', `Asset: ${url}`, 'info');
+        log('textureInspection', `  Textures count: ${Object.keys(asset.textures).length}`, 'info');
+        
+        const texList = document.createElement('div');
+        texList.className = 'texture-list';
+        
+        for (const [name, tex] of Object.entries(asset.textures).slice(0, 20)) {
+          const item = document.createElement('div');
+          item.className = 'texture-item';
+          item.textContent = name;
+          texList.appendChild(item);
+        }
+        
+        document.getElementById('textureInspection').appendChild(texList);
+        
+        if (Object.keys(asset.textures).length > 20) {
+          log('textureInspection', `  ... and ${Object.keys(asset.textures).length - 20} more`, 'info');
+        }
+      }
+    };
+
+    window.verifyFiles = async () => {
+      const div = document.getElementById('fileVerification');
+      div.innerHTML = '';
+      
+      const files = [
+        './atlases/hex_terrain-0.json',
+        './atlases/hex_terrain-0.png',
+        './atlases/hex_terrain-1.json',
+        './atlases/hex_terrain-1.png',
+        './atlases/stickman-fighter.json',
+        './atlases/stickman-fighter.png'
+      ];
+      
+      log('fileVerification', 'Checking file existence...', 'info');
+      
+      for (const file of files) {
+        try {
+          const response = await fetch(file, { method: 'HEAD' });
+          if (response.ok) {
+            log('fileVerification', `✓ ${file} exists (${response.status})`, 'success');
+          } else {
+            log('fileVerification', `✗ ${file} not found (${response.status})`, 'error');
+          }
+        } catch (error) {
+          log('fileVerification', `✗ ${file} - ${error.message}`, 'error');
+        }
+      }
+    };
+
+    // Auto-run basic checks
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        log('urlTestResults', 'Running initial diagnostics...', 'info');
+        testUrl('./atlases/hex_terrain-0.json');
+      }, 500);
+    });
+  </script>
+</body>
+</html>
