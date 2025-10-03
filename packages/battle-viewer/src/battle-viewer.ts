@@ -99,8 +99,8 @@ export class BattleViewer extends HTMLElement {
 
     // Get actual dimensions, fallback to defaults
     const rect = this.getBoundingClientRect();
-    const width = rect.width > 0 ? rect.width : 800;
-    const height = rect.height > 0 ? rect.height : 400;
+    const width = rect.width > 0 ? Math.floor(rect.width) : 800;
+    const height = rect.height > 0 ? Math.floor(rect.height) : 400;
 
     try {
       this.app = new Application();
@@ -143,19 +143,30 @@ export class BattleViewer extends HTMLElement {
 
   private async reinitializeArena(): Promise<void> {
     if (this.arena) {
-      this.arena.destroy();
-    }
-    await this.initializeArena();
-    if (this.battleData) {
-      this.renderBattle();
+      // Update the arena config
+      this.arena.updateConfig({
+        tileSize: this.arenaConfig.tileSize,
+        radius: this.arenaConfig.radius,
+        backgroundColor: this.arenaConfig.backgroundColor,
+        tileSpritesheet: this.arenaConfig.tileSpritesheet,
+        tileTextureName: this.arenaConfig.tileTextureName,
+        tileTextureIndex: this.arenaConfig.tileTextureIndex,
+      });
+
+      // Reinitialize with the new configuration
+      await this.arena.reinitialize();
+    } else {
+      await this.initializeArena();
     }
   }
 
   private async renderBattle(): Promise<void> {
     if (!this.app || !this.battleData || !this.arena || !this.orchestrator) return;
 
-    // Clear existing content
-    this.arena.clear();
+    // Clear existing characters (but not tiles since those were handled in reinitializeArena)
+    for (const participant of this.battleData.participants) {
+      this.arena.removeCharacter(participant.id);
+    }
 
     // Setup participants
     for (const participant of this.battleData.participants) {
@@ -203,6 +214,12 @@ export class BattleViewer extends HTMLElement {
    */
   setArenaConfig(config: Partial<ArenaConfig>): void {
     this.arenaConfig = { ...this.arenaConfig, ...config };
+
+    // Update the Pixi app background color if it changed
+    if (this.app && config.backgroundColor !== undefined) {
+      this.app.renderer.background.color = config.backgroundColor;
+    }
+
     this.reinitializeArena();
   }
 

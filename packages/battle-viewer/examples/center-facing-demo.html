@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Viewer - Center Facing Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+        }
+        
+        button {
+            background-color: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #357abd;
+        }
+        
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
+        .info {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 4px;
+        }
+        
+        #battleCanvas {
+            border: 2px solid #444;
+            border-radius: 8px;
+        }
+        
+        .position-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .character-info {
+            background: #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Battle Viewer - Center Facing Demo</h1>
+        <p>This demo shows characters automatically facing towards the center (0,0) when they spawn, and then facing towards movement/attack directions.</p>
+        
+        <div class="controls">
+            <h3>Character Setup</h3>
+            <button onclick="loadCharactersAroundCenter()">Load Characters Around Center</button>
+            <button onclick="loadCharactersInCorners()">Load Characters in Corners</button>
+            <button onclick="loadRandomPositions()">Load Random Positions</button>
+            <div class="info">
+                <p><strong>Expected Behavior:</strong></p>
+                <ul>
+                    <li>Characters spawn facing towards the center (0,0)</li>
+                    <li>Characters at negative q positions should face right (towards center)</li>
+                    <li>Characters at positive q positions should face left (towards center)</li>
+                    <li>Characters at q=0 will face their default direction (usually right)</li>
+                </ul>
+            </div>
+        </div>
+
+        <battle-viewer
+            id="battleCanvas"
+            style="width: 800px; height: 600px; display: block; margin: 0 auto;"
+        ></battle-viewer>
+
+        <div class="controls">
+            <h3>Movement Controls</h3>
+            <button onclick="moveAllTowardsCenter()">Move All Towards Center</button>
+            <button onclick="moveAllAwayFromCenter()">Move All Away From Center</button>
+            <button onclick="playBattle()">▶️ Play Movement</button>
+            <button onclick="resetBattle()">⏮️ Reset</button>
+        </div>
+
+        <div id="characterPositions" class="position-info"></div>
+    </div>
+
+    <script type="module">
+        import { BattleViewer } from '../dist/index.mjs';
+        
+        // Register the web component
+        customElements.define('battle-viewer', BattleViewer);
+        
+        const battleViewer = document.getElementById('battleCanvas');
+        let currentBattleData = null;
+
+        // Create different character setups to test center-facing
+        const characterConfigs = [
+            {
+                id: 'north',
+                name: 'North Character',
+                spriteConfig: {
+                    spritesheet: './atlases/characters.json',
+                    animationMap: {
+                        idle: 'fighter_Idle',
+                        run: 'fighter_Run',
+                        attack: 'fighter_Attack'
+                    },
+                    size: { width: 64, height: 64 },
+                    facingConfig: {
+                        defaultFacing: 'right',
+                        allowMirroring: true
+                    }
+                }
+            },
+            {
+                id: 'south',
+                name: 'South Character',
+                spriteConfig: {
+                    spritesheet: './atlases/characters.json',
+                    animationMap: {
+                        idle: 'fighter_Idle',
+                        run: 'fighter_Run',
+                        attack: 'fighter_Attack'
+                    },
+                    size: { width: 64, height: 64 },
+                    facingConfig: {
+                        defaultFacing: 'right',
+                        allowMirroring: true
+                    }
+                }
+            },
+            {
+                id: 'east',
+                name: 'East Character',
+                spriteConfig: {
+                    spritesheet: './atlases/characters.json',
+                    animationMap: {
+                        idle: 'fighter_Idle',
+                        run: 'fighter_Run',
+                        attack: 'fighter_Attack'
+                    },
+                    size: { width: 64, height: 64 },
+                    facingConfig: {
+                        defaultFacing: 'right',
+                        allowMirroring: true
+                    }
+                }
+            },
+            {
+                id: 'west',
+                name: 'West Character',
+                spriteConfig: {
+                    spritesheet: './atlases/characters.json',
+                    animationMap: {
+                        idle: 'fighter_Idle',
+                        run: 'fighter_Run',
+                        attack: 'fighter_Attack'
+                    },
+                    size: { width: 64, height: 64 },
+                    facingConfig: {
+                        defaultFacing: 'right',
+                        allowMirroring: true
+                    }
+                }
+            }
+        ];
+
+        function createBattleData(positions) {
+            const participants = positions.map((pos, index) => ({
+                ...characterConfigs[index % characterConfigs.length],
+                id: `char${index}`,
+                name: `Character ${index + 1}`,
+                initialPosition: pos
+            }));
+
+            return {
+                participants,
+                turns: []
+            };
+        }
+
+        function updateCharacterPositionDisplay(battleData) {
+            const container = document.getElementById('characterPositions');
+            if (!battleData || !battleData.participants) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = battleData.participants.map(p => {
+                const distanceFromCenter = Math.sqrt(p.initialPosition.q ** 2 + p.initialPosition.r ** 2);
+                const expectedFacing = p.initialPosition.q < 0 ? 'right (towards center)' : 
+                                     p.initialPosition.q > 0 ? 'left (towards center)' : 
+                                     'right (default, at center q=0)';
+                
+                return `
+                    <div class="character-info">
+                        <div><strong>${p.name}</strong></div>
+                        <div>Position: (q: ${p.initialPosition.q}, r: ${p.initialPosition.r})</div>
+                        <div>Distance from center: ${distanceFromCenter.toFixed(1)}</div>
+                        <div>Expected facing: ${expectedFacing}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.loadCharactersAroundCenter = () => {
+            const positions = [
+                { q: 0, r: -2 },  // North
+                { q: 0, r: 2 },   // South  
+                { q: 2, r: 0 },   // East (should face left towards center)
+                { q: -2, r: 0 }   // West (should face right towards center)
+            ];
+            
+            currentBattleData = createBattleData(positions);
+            battleViewer.setBattleData(currentBattleData);
+            updateCharacterPositionDisplay(currentBattleData);
+        };
+
+        window.loadCharactersInCorners = () => {
+            const positions = [
+                { q: -3, r: -1 },  // Northwest (should face right towards center)
+                { q: 3, r: -2 },   // Northeast (should face left towards center)
+                { q: 3, r: 1 },    // Southeast (should face left towards center)
+                { q: -3, r: 2 }    // Southwest (should face right towards center)
+            ];
+            
+            currentBattleData = createBattleData(positions);
+            battleViewer.setBattleData(currentBattleData);
+            updateCharacterPositionDisplay(currentBattleData);
+        };
+
+        window.loadRandomPositions = () => {
+            const positions = [];
+            for (let i = 0; i < 6; i++) {
+                positions.push({
+                    q: Math.floor(Math.random() * 8) - 4,  // -4 to 3
+                    r: Math.floor(Math.random() * 8) - 4   // -4 to 3
+                });
+            }
+            
+            currentBattleData = createBattleData(positions);
+            battleViewer.setBattleData(currentBattleData);
+            updateCharacterPositionDisplay(currentBattleData);
+        };
+
+        window.moveAllTowardsCenter = () => {
+            if (!currentBattleData) return;
+
+            const turns = [{
+                id: 'move-to-center',
+                timestamp: Date.now(),
+                actions: currentBattleData.participants.map((p, index) => ({
+                    type: 'move',
+                    actor: p.id,
+                    position: { 
+                        q: Math.floor(p.initialPosition.q / 2), 
+                        r: Math.floor(p.initialPosition.r / 2) 
+                    }
+                }))
+            }];
+
+            battleViewer.setBattleData({ ...currentBattleData, turns });
+        };
+
+        window.moveAllAwayFromCenter = () => {
+            if (!currentBattleData) return;
+
+            const turns = [{
+                id: 'move-away-from-center',
+                timestamp: Date.now(),
+                actions: currentBattleData.participants.map((p, index) => ({
+                    type: 'move',
+                    actor: p.id,
+                    position: { 
+                        q: p.initialPosition.q * 1.5, 
+                        r: p.initialPosition.r * 1.5 
+                    }
+                }))
+            }];
+
+            battleViewer.setBattleData({ ...currentBattleData, turns });
+        };
+
+        window.playBattle = () => {
+            battleViewer.setPlaying(true);
+        };
+
+        window.resetBattle = () => {
+            battleViewer.reset();
+        };
+
+        // Initialize with default setup
+        window.addEventListener('load', () => {
+            battleViewer.setArenaConfig({
+                radius: 5,
+                tileSize: 32,
+                backgroundColor: 0x1a472a,
+                tileSpritesheet: './atlases/tiles.json',
+                tileTextureName: 'hex_grass.png'
+            });
+            
+            loadCharactersAroundCenter();
+        });
+    </script>
+</body>
+</html>

@@ -88,7 +88,6 @@
     <div class="controls">
       <button onclick="loadHexBattle()">Load Hex Battle</button>
       <button onclick="loadLargeBattle()">Load Large Battle</button>
-      <button onclick="customizeArena()">Customize Arena</button>
     </div>
     
     <div class="play-controls controls">
@@ -123,6 +122,10 @@
               attack: "fighter_combo",
               hit: "fighter_hit"
             },
+            facingConfig: {
+              defaultFacing: "right",    // Most sprites face right by default
+              allowMirroring: true,       // Enable automatic sprite flipping
+            }
           },
           weaponId: 1
         },
@@ -170,7 +173,6 @@
               type: "move",
               actor: "p1",
               path: [
-                { q: 1, r: 2 },
                 { q: 0, r: 2 },
                 { q: -1, r: 2 },
                 { q: -1, r: 1 }
@@ -198,7 +200,6 @@
               type: "move",
               actor: "p2",
               path: [
-                { q: -2, r: 1 },
                 { q: -2, r: 0 },
                 { q: -2, r: -1 }
               ]
@@ -241,20 +242,118 @@
       ]
     };
 
+    const largeBattle = {
+      participants: [
+        {
+          id: "p1",
+          name: "Knight",
+          initialPosition: { q: 4, r: 3 },
+          spriteConfig: {
+            spritesheet: "/atlases/stickman-fighter-sword.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "sword_Idle",
+              run: "sword_run",
+              attack: "sword_combo",
+              hit: "sword_hit"
+            },
+            facingConfig: {
+              defaultFacing: "right",    // Most sprites face right by default
+              allowMirroring: true,       // Enable automatic sprite flipping
+            }
+          },
+          weaponId: 1
+        },
+        {
+          id: "p2",
+          name: "Archer",
+          initialPosition: { q: -4, r: -3 },
+          spriteConfig: {
+            spritesheet: "/atlases/stickman-fighter-sword.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "sword_Idle",
+              run: "sword_run",
+              attack: "sword_combo",
+              hit: "sword_hit"
+            }
+          },
+          weaponId: 2
+        },
+        {
+          id: "e1",
+          name: "Orc",
+          initialPosition: { q: -6, r: 3 },
+          spriteConfig: {
+            spritesheet: "/atlases/stickman-fighter-pistol.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "pistol_Idle",
+              run: "pistol_run",
+              attack: "pistol_shot",
+              hit: "pistol_hit"
+            }
+          },
+          weaponId: 0
+        },
+        {
+          id: "e2",
+          name: "Mage",
+          initialPosition: { q: 6, r: -6 },
+          spriteConfig: {
+            spritesheet: "/atlases/stickman-fighter-pistol.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "pistol_Idle",
+              run: "pistol_run",
+              attack: "pistol_shot",
+              hit: "pistol_hit"
+            }
+          },
+          weaponId: 0
+        }
+      ],
+      turns: []
+    };
+
+
     // Global functions for buttons
     window.loadHexBattle = () => {
       const viewer = document.getElementById("hexViewer");
+      viewer.setArenaConfig({
+        radius: 5,
+        tileSize: 32,
+        backgroundColor: 0x1a472a,
+        tileSpritesheet: "/atlases/hex_tiles.json",
+        // Choose the tile texture either by name or by index
+        tileTextureName: "hex_grass.png"
+        // Or alternatively: tileTextureIndex: 0
+      });
       viewer.setBattleData(hexBattle);
       updateInfo("Hex battle loaded");
     };
 
-    window.customizeArena = () => {
+    window.loadLargeBattle = () => {
       const viewer = document.getElementById("hexViewer");
       viewer.setArenaConfig({
-        radius: 7,
-        tileSize: 40,
-        backgroundColor: 0x2c5aa0
+        radius: 8,
+        tileSize: 24,
+        backgroundColor: 0x2c5aa0,
+        tileSpritesheet: "/atlases/hex_tiles.json",
+        // Choose the tile texture either by name or by index
+        tileTextureName: "hex_grass.png"
       });
+      viewer.setBattleData(largeBattle);
+      updateInfo("Large battle loaded");
+
+    }
+
+    window.customizeArena = () => {
+      const viewer = document.getElementById("hexViewer");
       updateInfo("Arena customized: radius=7, tileSize=40");
     };
 
@@ -284,16 +383,6 @@
     window.addEventListener("load", () => {
       // Set initial arena config, including tiles atlas provided by client
       const viewer = document.getElementById("hexViewer");
-      viewer.setArenaConfig({
-        radius: 5,
-        tileSize: 32,
-        backgroundColor: 0x1a472a,
-        tileSpritesheet: "/atlases/hex_tiles.json",
-        // Choose the tile texture either by name or by index
-        tileTextureName: "hex_grass.png"
-        // Or alternatively: tileTextureIndex: 0
-      });
-
       loadHexBattle();
     });
   </script>

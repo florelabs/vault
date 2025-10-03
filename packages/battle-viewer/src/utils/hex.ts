@@ -1,4 +1,4 @@
-import type { AxialCoordinates, PixelCoordinates } from "../types/index.js";
+import type { AxialCoordinates, FacingDirection, PixelCoordinates } from "../types/index.js";
 
 /**
  * Hexagonal utilities adapted from champion-wars-replay
@@ -49,4 +49,26 @@ export function createPixelCoordinatesFactory(
 ) {
   return (axialCoords: AxialCoordinates) =>
     offsetPixelCoord(axialToPixel(axialCoords, tileSize), viewportWidth, viewportHeight);
+}
+
+/**
+ * Determines the facing direction based on the change in axial coordinates.
+ * Characters face towards the direction they are moving or acting.
+ *
+ * @param fromCoords - Starting position
+ * @param toCoords - Target position
+ * @returns "left" if moving/acting towards lower q values, "right" if towards higher q values
+ */
+export function getFacingDirection(
+  fromCoords: AxialCoordinates,
+  toCoords: AxialCoordinates,
+  currentFacing: "right" | "left" = "right"
+): FacingDirection {
+  const deltaQ = toCoords.q - fromCoords.q;
+
+  // If q is increasing (moving towards the right), face right
+  // If q is decreasing (moving towards the left), face left
+  // If no change in q, maintain current facing (default to right)
+  if (deltaQ === 0) return currentFacing;
+  return deltaQ > 0 ? "right" : "left";
 }

@@ -61,18 +61,32 @@
           name: "Hero",
           initialPosition: { q: 1, r: 1 },
           spriteConfig: {
-            spritesheet: "", // Empty for now - will use default rendering
-            size: { width: 48, height: 48 }
-          }
+            spritesheet: "/atlases/stickman-fighter.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "fighter_Idle",
+              run: "fighter_run",
+              attack: "fighter_combo",
+              hit: "fighter_hit"
+            },
+          },
         },
         {
           id: "monster",
           name: "Monster", 
           initialPosition: { q: -2, r: 1 },
           spriteConfig: {
-            spritesheet: "", // Empty for now - will use default rendering
-            size: { width: 48, height: 48 }
-          }
+            spritesheet: "/atlases/stickman-fighter.json",
+            size: { width: 128, height: 128 },
+            anchor: { x: 0.5, y: 0.7 },
+            animationMap: {
+              idle: "fighter_Idle",
+              run: "fighter_run",
+              attack: "fighter_combo",
+              hit: "fighter_hit"
+            },
+          },
         }
       ],
       turns: [

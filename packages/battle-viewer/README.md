@@ -12,6 +12,7 @@ Auto-battle visualizer using PixiJS, packaged as a Web Component with hexagonal 
 - ⚡ High performance rendering
 - 🗺️ Hexagonal coordinate system (axial coordinates)
 - 🎭 Character animations and movement
+- ↔️ Automatic character facing direction based on actions
 - ⚔️ Battle orchestration with turn-based actions
 
 ## Installation
@@ -175,12 +176,81 @@ interface SpriteConfig {
   animations?: AnimationConfig;   // Animation settings
   size?: { width: number; height: number };
   anchor?: { x: number; y: number };
+  facingConfig?: CharacterFacingConfig;  // Facing direction settings
+}
+
+interface CharacterFacingConfig {
+  defaultFacing?: "left" | "right";    // Default facing direction (default: "right")
+  allowMirroring?: boolean;            // Enable sprite mirroring (default: true)
 }
 
 interface AxialCoordinates {
   q: number;  // Axial coordinate Q
   r: number;  // Axial coordinate R
 }
+```
+
+## Character Facing Direction
+
+The battle viewer automatically manages character facing directions based on their actions:
+
+### Automatic Facing Direction
+
+Characters will automatically face the correct direction when:
+- **At spawn**: Face towards the center (0,0) by default
+- **Moving**: Face towards the destination (left for decreasing q, right for increasing q)
+- **Attacking**: Face towards the target character
+- **Using Skills**: Face towards the target (if applicable)
+
+### Configuration
+
+```javascript
+const participant = {
+  id: "hero",
+  name: "Knight",
+  initialPosition: { q: -2, r: 1 }, // Will face right (towards center)
+  spriteConfig: {
+    spritesheet: "/sprites/knight.json",
+    size: { width: 64, height: 64 },
+    facingConfig: {
+      defaultFacing: "right",     // Override auto-center facing if needed
+      allowMirroring: true        // Enable horizontal sprite flipping
+    }
+  }
+};
+```
+
+### Manual Control
+
+You can also manually control facing direction:
+
+```javascript
+const arena = viewer.getArena();
+const character = arena.getCharacter("hero");
+
+// Set facing direction
+character.setFacingDirection("left");
+
+// Get current facing direction
+const currentFacing = character.getFacingDirection(); // "left" | "right"
+
+// Get character's axial position
+const axialPos = character.getAxialPosition(); // { q: number, r: number }
+
+// Move using axial coordinates (handles facing automatically)
+await character.moveToAxialPosition({ q: 1, r: 0 });
+```
+
+### Coordinate System Behavior
+
+- **q increasing** (moving right): Character faces right
+- **q decreasing** (moving left): Character faces left  
+- **q unchanged**: No facing change (maintains current direction)
+
+Example with hexagonal movement:
+```
+   (-1,0) ← faces left ← (0,0) → faces right → (1,0)
+```
 ```
 
 ## Hexagonal Coordinate System
@@ -240,6 +310,8 @@ await character.moveToPosition({ x: 100, y: 100 });
 See the `examples/` directory for:
 - `basic-usage.html` - Simple battle setup
 - `hexagonal-battle.html` - Advanced hexagonal combat with controls
+- `facing-direction-demo.html` - Character facing direction demonstration
+- `center-facing-demo.html` - Characters facing towards center demonstration
 
 ## Browser Support
 

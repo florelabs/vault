@@ -2,11 +2,18 @@ import {
   AnimatedSprite,
   Assets,
   Container,
-  Graphics,
+  type Graphics,
   type Spritesheet,
   type Texture,
 } from "pixi.js";
-import type { AnimationName, PixelCoordinates, SpriteConfig } from "../types/index.js";
+import type {
+  AnimationName,
+  AxialCoordinates,
+  FacingDirection,
+  PixelCoordinates,
+  SpriteConfig,
+} from "../types/index.js";
+import { getFacingDirection } from "../utils/hex.js";
 
 // moved to types
 
@@ -35,20 +42,35 @@ export class BattleCharacter {
   private position: PixelCoordinates;
   private weaponId: number | null;
 
+  // Spatial awareness properties
+  private axialPosition: AxialCoordinates;
+  private getPixelCoordinates: (coords: AxialCoordinates) => PixelCoordinates;
+
+  // Facing direction properties
+  private currentFacing: FacingDirection;
+  private defaultFacing: FacingDirection;
+
   constructor(
     id: string,
-    initialPosition: PixelCoordinates,
-    spriteConfig: SpriteConfig = { spritesheet: "" },
-    _weaponId: number | null = null
+    axialPosition: AxialCoordinates,
+    getPixelCoordinates: (coords: AxialCoordinates) => PixelCoordinates,
+    spriteConfig: SpriteConfig = { spritesheet: "", size: { width: 64, height: 64 } },
+    weaponId: number | null = null
   ) {
     this.id = id;
+    this.axialPosition = { ...axialPosition };
+    this.getPixelCoordinates = getPixelCoordinates;
+    this.position = this.getPixelCoordinates(this.axialPosition);
+
     this.spriteConfig = {
-      size: { width: 64, height: 64 },
       anchor: { x: 0.5, y: 0.85 },
       ...spriteConfig,
     };
-    this.position = { ...initialPosition };
-    this.weaponId = _weaponId;
+    this.weaponId = weaponId;
+
+    // Initialize facing direction - face towards center by default
+    this.defaultFacing = this.spriteConfig.facingConfig?.defaultFacing || "right";
+    this.currentFacing = this.calculateInitialFacing();
 
     this.container = new Container();
     this.container.x = this.position.x;
@@ -61,36 +83,11 @@ export class BattleCharacter {
   }
 
   async initialize(): Promise<void> {
-    if (this.spriteConfig.spritesheet) {
-      await this.loadSpritesheet();
-      this.createAnimatedSprite();
-    } else {
-      // Create fallback visual representation
-      this.createFallbackSprite();
+    if (!this.spriteConfig.spritesheet) {
+      throw new Error("Cannot find spritesheet");
     }
-  }
-
-  private createFallbackSprite(): void {
-    this.fallbackSprite = new Graphics();
-
-    // Create a simple colored circle to represent the character
-    const colors = [0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xffeaa7, 0xdda0dd];
-    const color =
-      colors[Math.abs(this.id.split("").reduce((a, b) => a + b.charCodeAt(0), 0)) % colors.length];
-
-    const radius = Math.min(this.spriteConfig.size?.width, this.spriteConfig.size?.height) / 2;
-
-    this.fallbackSprite.circle(0, 0, radius);
-    this.fallbackSprite.fill(color);
-    this.fallbackSprite.stroke({ width: 2, color: 0xffffff });
-
-    // Add a simple label
-    // Note: In a real implementation, you might want to add PIXI.Text here
-
-    this.container.addChild(this.fallbackSprite);
-    console.log(
-      `Created fallback sprite for character ${this.id} with color ${color.toString(16)}`
-    );
+    await this.loadSpritesheet();
+    this.createAnimatedSprite();
   }
 
   private async loadSpritesheet(): Promise<void> {
@@ -119,12 +116,18 @@ export class BattleCharacter {
     if (idleTextures && idleTextures.length > 0) {
       this.animatedSprite = new AnimatedSprite(idleTextures);
 
-      this.animatedSprite.width = this.spriteConfig.size?.width;
-      this.animatedSprite.height = this.spriteConfig.size?.height;
-      this.animatedSprite.anchor.set(this.spriteConfig.anchor?.x, this.spriteConfig.anchor?.y);
+      this.animatedSprite.width = this.spriteConfig.size.width;
+      this.animatedSprite.height = this.spriteConfig.size.height;
+      const anchorX = this.spriteConfig.anchor?.x ?? 0.5;
+      const anchorY = this.spriteConfig.anchor?.y ?? 0.85;
+      this.animatedSprite.anchor.set(anchorX, anchorY);
 
       this.setAnimation("idle");
       this.container.addChild(this.animatedSprite);
+
+      // Apply initial facing direction
+      this.updateSpriteFlip();
+
       console.log(`[BattleCharacter:${this.id}] Animated sprite created.`);
     } else {
       console.warn(
@@ -132,7 +135,7 @@ export class BattleCharacter {
         idleKey,
         "Check spriteConfig.animationMap.idle"
       );
-      this.createFallbackSprite();
+      throw new Error(`[BattleCharacter:${this.id}] No idle textures found for key ${idleKey}`);
     }
   }
 
@@ -263,9 +266,31 @@ export class BattleCharacter {
     });
   }
 
-  async moveAlongPath(path: PixelCoordinates[], stepDuration = 1000): Promise<void> {
-    for (const position of path) {
-      await this.moveToPosition(position, stepDuration);
+  /**
+   * Move to an axial coordinate position
+   */
+  async moveToAxialPosition(targetAxialPosition: AxialCoordinates, duration = 1000): Promise<void> {
+    // Update facing direction based on axial coordinate change
+    const facingDirection = getFacingDirection(
+      this.axialPosition,
+      targetAxialPosition,
+      this.currentFacing
+    );
+    this.setFacingDirection(facingDirection);
+
+    const targetPixelPosition = this.getPixelCoordinates(targetAxialPosition);
+    await this.moveToPosition(targetPixelPosition, duration);
+
+    // Update axial position after movement completes
+    this.axialPosition = { ...targetAxialPosition };
+  }
+
+  /**
+   * Move along an axial coordinate path
+   */
+  async moveAlongAxialPath(path: AxialCoordinates[], stepDuration = 1000): Promise<void> {
+    for (const axialPosition of path) {
+      await this.moveToAxialPosition(axialPosition, stepDuration);
     }
   }
 
@@ -287,12 +312,38 @@ export class BattleCharacter {
     });
   }
 
+  /**
+   * Calculates the default facing direction based on position relative to center
+   * Characters face towards the center (0,0) by default
+   */
+  private calculateInitialFacing(): FacingDirection {
+    const centerCoords: AxialCoordinates = { q: 0, r: 0 };
+    return getFacingDirection(this.axialPosition, centerCoords);
+  }
+
   getPosition(): PixelCoordinates {
     return { ...this.position };
   }
 
+  /**
+   * Get the current axial coordinates of the character
+   */
+  getAxialPosition(): AxialCoordinates {
+    return { ...this.axialPosition };
+  }
+
   setPosition(position: PixelCoordinates): void {
     this.position = { ...position };
+    this.container.x = this.position.x;
+    this.container.y = this.position.y;
+  }
+
+  /**
+   * Set both axial and pixel position (keeps them in sync)
+   */
+  setAxialPosition(axialPosition: AxialCoordinates): void {
+    this.axialPosition = { ...axialPosition };
+    this.position = this.getPixelCoordinates(this.axialPosition);
     this.container.x = this.position.x;
     this.container.y = this.position.y;
   }
@@ -307,6 +358,49 @@ export class BattleCharacter {
 
   getCurrentAnimation(): AnimationName {
     return this.currentAnimation;
+  }
+
+  /**
+   * Sets the facing direction and updates sprite mirroring if enabled
+   */
+  setFacingDirection(direction: FacingDirection): void {
+    if (this.currentFacing === direction) {
+      return; // No change needed
+    }
+
+    this.currentFacing = direction;
+    this.updateSpriteFlip();
+  }
+
+  /**
+   * Gets the current facing direction
+   */
+  getFacingDirection(): FacingDirection {
+    return this.currentFacing;
+  }
+
+  /**
+   * Updates the sprite flip based on current facing direction and configuration
+   */
+  private updateSpriteFlip(): void {
+    const sprite = this.animatedSprite || this.fallbackSprite;
+    if (!sprite) return;
+
+    const { facingConfig } = this.spriteConfig;
+    const allowMirroring = facingConfig?.allowMirroring ?? true;
+
+    if (!allowMirroring) {
+      return; // Mirroring is disabled for this character
+    }
+
+    // Determine if we need to flip the sprite
+    // If sprite naturally faces right and character should face left, flip it
+    // If sprite naturally faces left and character should face right, flip it
+    const shouldFlip =
+      (this.defaultFacing === "right" && this.currentFacing === "left") ||
+      (this.defaultFacing === "left" && this.currentFacing === "right");
+
+    sprite.scale.x = shouldFlip ? -Math.abs(sprite.scale.x) : Math.abs(sprite.scale.x);
   }
 
   destroy(): void {

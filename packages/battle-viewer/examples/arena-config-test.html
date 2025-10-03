@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena Config Test - Grid Rendering Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+        }
+        
+        button {
+            background-color: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #357abd;
+        }
+        
+        .info {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        #battleCanvas {
+            border: 2px solid #444;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Arena Config Test - Grid Rendering Debug</h1>
+        <p>This test helps debug grid rendering issues when switching between different arena configurations.</p>
+        
+        <div class="controls">
+            <h3>Test Scenarios</h3>
+            <button onclick="loadSmallGrid()">Small Grid (radius: 3, tileSize: 50)</button>
+            <button onclick="loadMediumGrid()">Medium Grid (radius: 5, tileSize: 32)</button>
+            <button onclick="loadLargeGrid()">Large Grid (radius: 8, tileSize: 24)</button>
+            <button onclick="switchColors()">Switch Background Colors</button>
+            <div class="info" id="status">Status: Ready</div>
+        </div>
+
+        <battle-viewer
+            id="battleCanvas"
+            style="width: 800px; height: 600px; display: block; margin: 0 auto;"
+        ></battle-viewer>
+
+        <div class="controls">
+            <h3>Character Movement Test</h3>
+            <button onclick="addTestCharacter()">Add Test Character</button>
+            <button onclick="moveCharacter()">Move Character</button>
+            <button onclick="removeCharacter()">Remove Character</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { BattleViewer } from '../dist/index.mjs';
+        
+        // Register the web component
+        customElements.define('battle-viewer', BattleViewer);
+        
+        const battleViewer = document.getElementById('battleCanvas');
+        const status = document.getElementById('status');
+        
+        let currentCharacterCount = 0;
+        let colorIndex = 0;
+        const backgroundColors = [0x1a472a, 0x2c5aa0, 0x7c3aed, 0xdc2626, 0xea580c];
+        const colorNames = ['Green', 'Blue', 'Purple', 'Red', 'Orange'];
+
+        // Test battle data with a single character
+        const testBattleData = {
+            participants: [
+                {
+                    id: 'testchar',
+                    name: 'Test Character',
+                    initialPosition: { q: 0, r: 0 },
+                    spriteConfig: {
+                        spritesheet: './atlases/characters.json',
+                        animationMap: {
+                            idle: 'fighter_Idle',
+                            run: 'fighter_Run',
+                            attack: 'fighter_Attack'
+                        },
+                        size: { width: 64, height: 64 },
+                        facingConfig: {
+                            defaultFacing: 'right',
+                            allowMirroring: true
+                        }
+                    }
+                }
+            ],
+            turns: []
+        };
+
+        function updateStatus(message) {
+            status.textContent = `Status: ${message}`;
+        }
+
+        window.loadSmallGrid = () => {
+            updateStatus('Loading Small Grid...');
+            battleViewer.setArenaConfig({
+                radius: 3,
+                tileSize: 50,
+                backgroundColor: backgroundColors[colorIndex],
+                tileSpritesheet: './atlases/tiles.json',
+                tileTextureName: 'hex_grass.png'
+            });
+            updateStatus(`Small Grid loaded (radius: 3, tileSize: 50, color: ${colorNames[colorIndex]})`);
+        };
+
+        window.loadMediumGrid = () => {
+            updateStatus('Loading Medium Grid...');
+            battleViewer.setArenaConfig({
+                radius: 5,
+                tileSize: 32,
+                backgroundColor: backgroundColors[colorIndex],
+                tileSpritesheet: './atlases/tiles.json',
+                tileTextureName: 'hex_grass.png'
+            });
+            updateStatus(`Medium Grid loaded (radius: 5, tileSize: 32, color: ${colorNames[colorIndex]})`);
+        };
+
+        window.loadLargeGrid = () => {
+            updateStatus('Loading Large Grid...');
+            battleViewer.setArenaConfig({
+                radius: 8,
+                tileSize: 24,
+                backgroundColor: backgroundColors[colorIndex],
+                tileSpritesheet: './atlases/tiles.json',
+                tileTextureName: 'hex_grass.png'
+            });
+            updateStatus(`Large Grid loaded (radius: 8, tileSize: 24, color: ${colorNames[colorIndex]})`);
+        };
+
+        window.switchColors = () => {
+            colorIndex = (colorIndex + 1) % backgroundColors.length;
+            const currentConfig = battleViewer.getArenaConfig();
+            battleViewer.setArenaConfig({
+                ...currentConfig,
+                backgroundColor: backgroundColors[colorIndex]
+            });
+            updateStatus(`Background color changed to ${colorNames[colorIndex]}`);
+        };
+
+        window.addTestCharacter = () => {
+            if (currentCharacterCount === 0) {
+                battleViewer.setBattleData(testBattleData);
+                currentCharacterCount = 1;
+                updateStatus('Test character added');
+            } else {
+                updateStatus('Character already exists');
+            }
+        };
+
+        window.moveCharacter = () => {
+            if (currentCharacterCount === 0) {
+                updateStatus('No character to move - add one first');
+                return;
+            }
+
+            // Create movement data
+            const moveData = {
+                ...testBattleData,
+                turns: [
+                    {
+                        id: 'move-test',
+                        timestamp: Date.now(),
+                        actions: [
+                            {
+                                type: 'move',
+                                actor: 'testchar',
+                                path: [
+                                    { q: 1, r: 0 },
+                                    { q: 1, r: -1 },
+                                    { q: 0, r: -1 }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+            
+            battleViewer.setBattleData(moveData);
+            battleViewer.setPlaying(true);
+            updateStatus('Character moving...');
+        };
+
+        window.removeCharacter = () => {
+            if (currentCharacterCount > 0) {
+                const emptyData = { participants: [], turns: [] };
+                battleViewer.setBattleData(emptyData);
+                currentCharacterCount = 0;
+                updateStatus('Character removed');
+            } else {
+                updateStatus('No character to remove');
+            }
+        };
+
+        // Initialize with medium grid
+        window.addEventListener('load', () => {
+            loadMediumGrid();
+            updateStatus('Initialized with Medium Grid');
+        });
+    </script>
+</body>
+</html>

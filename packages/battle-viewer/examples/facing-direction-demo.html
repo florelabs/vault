@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Viewer - Facing Direction Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+        }
+        
+        button {
+            background-color: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #357abd;
+        }
+        
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
+        .info {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 4px;
+        }
+        
+        #battleCanvas {
+            border: 2px solid #444;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Battle Viewer - Facing Direction Demo</h1>
+        <p>This demo showcases the new character facing direction system. Characters will automatically face the direction they're moving or attacking towards.</p>
+        
+        <div class="controls">
+            <h3>Battle Controls</h3>
+            <button id="playBtn">▶️ Play</button>
+            <button id="pauseBtn">⏸️ Pause</button>
+            <button id="resetBtn">⏮️ Reset</button>
+            <div class="info">
+                <p><strong>Features demonstrated:</strong></p>
+                <ul>
+                    <li>Characters face the direction they're moving (left/right based on q coordinate changes)</li>
+                    <li>Characters face their attack targets</li>
+                    <li>Sprite mirroring for natural left/right facing</li>
+                    <li>Configurable default facing direction per character</li>
+                </ul>
+            </div>
+        </div>
+
+        <battle-viewer
+            id="battleCanvas"
+            style="width: 800px; height: 600px; display: block; margin: 0 auto;"
+        ></battle-viewer>
+    </div>
+
+    <script type="module">
+        import { BattleViewer } from '../dist/index.mjs';
+        
+        // Register the web component
+        customElements.define('battle-viewer', BattleViewer);
+        
+        const battleViewer = document.getElementById('battleCanvas');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Sample battle data with facing direction scenarios
+        const battleData = {
+            participants: [
+                {
+                    id: 'hero',
+                    name: 'Hero',
+                    initialPosition: { q: -1, r: 0 },
+                    spriteConfig: {
+                        spritesheet: './atlases/characters.json',
+                        animationMap: {
+                            idle: 'fighter_Idle',
+                            run: 'fighter_Run',
+                            attack: 'fighter_Attack'
+                        },
+                        size: { width: 64, height: 64 },
+                        // Default facing right with mirroring enabled
+                        facingConfig: {
+                            defaultFacing: 'right',
+                            allowMirroring: true
+                        }
+                    }
+                },
+                {
+                    id: 'enemy',
+                    name: 'Enemy',
+                    initialPosition: { q: 1, r: 0 },
+                    spriteConfig: {
+                        spritesheet: './atlases/characters.json',
+                        animationMap: {
+                            idle: 'fighter_Idle',
+                            run: 'fighter_Run',
+                            attack: 'fighter_Attack'
+                        },
+                        size: { width: 64, height: 64 },
+                        // Default facing left for variety
+                        facingConfig: {
+                            defaultFacing: 'left',
+                            allowMirroring: true
+                        }
+                    }
+                }
+            ],
+            turns: [
+                {
+                    id: 'turn1',
+                    timestamp: 0,
+                    actions: [
+                        // Hero moves right (should face right)
+                        {
+                            type: 'move',
+                            actor: 'hero',
+                            position: { q: 0, r: 0 }
+                        }
+                    ]
+                },
+                {
+                    id: 'turn2',
+                    timestamp: 1000,
+                    actions: [
+                        // Enemy moves left (should face left)
+                        {
+                            type: 'move',
+                            actor: 'enemy',
+                            position: { q: 0, r: 1 }
+                        }
+                    ]
+                },
+                {
+                    id: 'turn3',
+                    timestamp: 2000,
+                    actions: [
+                        // Hero attacks enemy (should face towards enemy)
+                        {
+                            type: 'attack',
+                            actor: 'hero',
+                            target: 'enemy'
+                        }
+                    ]
+                },
+                {
+                    id: 'turn4',
+                    timestamp: 3000,
+                    actions: [
+                        // Enemy moves back right (should face right)
+                        {
+                            type: 'move',
+                            actor: 'enemy',
+                            position: { q: 1, r: 1 }
+                        }
+                    ]
+                },
+                {
+                    id: 'turn5',
+                    timestamp: 4000,
+                    actions: [
+                        // Enemy attacks hero (should face towards hero)
+                        {
+                            type: 'attack',
+                            actor: 'enemy',
+                            target: 'hero'
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const arenaConfig = {
+            radius: 3,
+            tileSize: 50,
+            backgroundColor: 0x2c3e50,
+            tileSpritesheet: './atlases/tiles.json',
+            tileTextureName: 'hex_grass.png'
+        };
+
+        // Set up the battle
+        battleViewer.setBattleData(battleData);
+        battleViewer.setArenaConfig(arenaConfig);
+
+        // Control handlers
+        playBtn.addEventListener('click', () => {
+            battleViewer.play();
+            playBtn.disabled = true;
+            pauseBtn.disabled = false;
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            battleViewer.pause();
+            playBtn.disabled = false;
+            pauseBtn.disabled = true;
+        });
+
+        resetBtn.addEventListener('click', () => {
+            battleViewer.reset();
+            playBtn.disabled = false;
+            pauseBtn.disabled = true;
+        });
+
+        // Initial state
+        pauseBtn.disabled = true;
+        
+        console.log('Facing Direction Demo loaded. Watch the characters face different directions based on their actions!');
+    </script>
+</body>
+</html>

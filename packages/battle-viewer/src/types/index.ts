@@ -30,6 +30,15 @@ export interface BattleParticipant {
   weaponId?: number | null;
 }
 
+export type FacingDirection = "left" | "right";
+
+export interface CharacterFacingConfig {
+  /** Default facing direction for the sprite (most sprites face right by default) */
+  defaultFacing?: FacingDirection;
+  /** Whether this character's sprite should be mirrored when facing the opposite direction */
+  allowMirroring?: boolean;
+}
+
 export interface ArenaConfig {
   radius: number;
   tileSize: number;
@@ -48,8 +57,10 @@ export interface SpriteConfig {
   animations?: AnimationConfig;
   /** Map logical actions to atlas animation keys (e.g., idle: "fighter_Idle") */
   animationMap?: Partial<Record<AnimationName, string>>;
-  size?: { width: number; height: number };
+  size: { width: number; height: number };
   anchor?: { x: number; y: number };
+  /** Configuration for character facing direction */
+  facingConfig?: CharacterFacingConfig;
 }
 
 export interface AnimationConfig {

@@ -1,5 +1,10 @@
-import type { AxialCoordinates, BattleAction, BattleData } from "../types/index.js";
-import { createPixelCoordinatesFactory } from "../utils/hex.js";
+import type {
+  AxialCoordinates,
+  BattleAction,
+  BattleData,
+  FacingDirection,
+} from "../types/index.js";
+import { getFacingDirection } from "../utils/hex.js";
 import type { BattleArena } from "./battle-arena.js";
 import type { BattleCharacter } from "./battle-character.js";
 
@@ -10,21 +15,24 @@ export class BattleOrchestrator {
   private currentActionIndex = 0;
   private isPlaying = false;
   private isPaused = false;
-  private getPixelCoordinates: (coords: AxialCoordinates) => { x: number; y: number };
+
+  // Track character positions for facing direction calculation
+  private characterPositions = new Map<string, AxialCoordinates>();
 
   constructor(arena: BattleArena) {
     this.arena = arena;
-    const config = arena.getConfig();
-    this.getPixelCoordinates = createPixelCoordinatesFactory(
-      config.tileSize,
-      config.viewportWidth ?? 800,
-      config.viewportHeight ?? 600
-    );
   }
 
   setBattleData(data: BattleData): void {
     console.log("Setting battle data:", data);
     this.battleData = data;
+
+    // Initialize character positions from participants
+    this.characterPositions.clear();
+    for (const participant of data.participants) {
+      this.characterPositions.set(participant.id, participant.initialPosition);
+    }
+
     this.reset();
   }
 
@@ -130,13 +138,18 @@ export class BattleOrchestrator {
 
   private async executeMoveAction(character: BattleCharacter, action: BattleAction): Promise<void> {
     if (action.path && action.path.length > 0) {
-      // Move along path
-      const pixelPath = action.path.map((coord) => this.getPixelCoordinates(coord));
-      await character.moveAlongPath(pixelPath);
+      // Use the new axial coordinate movement method
+      await character.moveAlongAxialPath(action.path);
+
+      // Update stored position to final destination
+      const finalPosition = action.path[action.path.length - 1];
+      this.characterPositions.set(action.actor, finalPosition);
     } else if (action.position) {
-      // Move to single position
-      const pixelPosition = this.getPixelCoordinates(action.position);
-      await character.moveToPosition(pixelPosition);
+      // Use the new axial coordinate movement method
+      await character.moveToAxialPosition(action.position);
+
+      // Update stored position
+      this.characterPositions.set(action.actor, action.position);
     }
   }
 
@@ -144,6 +157,17 @@ export class BattleOrchestrator {
     character: BattleCharacter,
     action: BattleAction
   ): Promise<void> {
+    // Update facing direction based on target position
+    if (action.target) {
+      const attackerPosition = this.characterPositions.get(action.actor);
+      const targetPosition = this.characterPositions.get(action.target);
+
+      if (attackerPosition && targetPosition) {
+        const facingDirection = getFacingDirection(attackerPosition, targetPosition);
+        character.setFacingDirection(facingDirection);
+      }
+    }
+
     // Play attacker animation
     await character.attack();
 
@@ -160,6 +184,17 @@ export class BattleOrchestrator {
     character: BattleCharacter,
     action: BattleAction
   ): Promise<void> {
+    // Update facing direction based on target position (if skill has target)
+    if (action.target) {
+      const actorPosition = this.characterPositions.get(action.actor);
+      const targetPosition = this.characterPositions.get(action.target);
+
+      if (actorPosition && targetPosition) {
+        const facingDirection = getFacingDirection(actorPosition, targetPosition);
+        character.setFacingDirection(facingDirection);
+      }
+    }
+
     // TODO: Implement skill-specific animations
     // For now, treat as attack
     console.log(`${character.getId()} uses skill:`, action.data);
@@ -202,6 +237,14 @@ export class BattleOrchestrator {
     completedActions += this.currentActionIndex;
 
     return Math.min(completedActions / totalActions, 1);
+  }
+
+  /**
+   * Gets the current facing direction of a character
+   */
+  getCharacterFacing(characterId: string): FacingDirection | null {
+    const character = this.arena.getCharacter(characterId);
+    return character ? character.getFacingDirection() : null;
   }
 
   destroy(): void {

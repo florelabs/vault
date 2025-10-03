@@ -36,9 +36,13 @@ export class BattleArena {
 
   constructor(app: Application, config: ArenaConfig) {
     this.app = app;
+    const rendererWidth =
+      (app.renderer?.width as number) || (app.canvas as HTMLCanvasElement).clientWidth || 800;
+    const rendererHeight =
+      (app.renderer?.height as number) || (app.canvas as HTMLCanvasElement).clientHeight || 600;
     this.config = {
-      viewportWidth: app.canvas.width,
-      viewportHeight: app.canvas.height,
+      viewportWidth: rendererWidth,
+      viewportHeight: rendererHeight,
       ...config,
     };
 
@@ -133,16 +137,18 @@ export class BattleArena {
   }
 
   async addCharacter(participant: BattleParticipant): Promise<void> {
-    const pixelCoords = this.getPixelCoordinates(participant.initialPosition);
-
     const character = new BattleCharacter(
       participant.id,
-      pixelCoords,
+      participant.initialPosition, // Pass axial position directly
+      this.getPixelCoordinates, // Pass the coordinate conversion factory
       participant.spriteConfig,
       participant.weaponId
     );
 
-    console.log(`[BattleArena] Adding character ${participant.id} at`, pixelCoords);
+    console.log(
+      `[BattleArena] Adding character ${participant.id} at axial`,
+      participant.initialPosition
+    );
     await character.initialize();
     console.log(`[BattleArena] Character ${participant.id} initialized`);
 
@@ -168,6 +174,15 @@ export class BattleArena {
     for (const [id] of this.characters) {
       this.removeCharacter(id);
     }
+    this.charactersContainer.removeChildren();
+
+    // Clear tiles
+    this.tiles.clear();
+    this.tilesById = [];
+    this.tilesContainer.removeChildren();
+
+    // Reset spritesheet reference so it gets reloaded if config changes
+    this.tileSpritesheet = null;
   }
 
   destroy(): void {
@@ -182,12 +197,27 @@ export class BattleArena {
 
   updateConfig(newConfig: Partial<ArenaConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    // Reinitialize if needed
+
+    // Update the pixel coordinates factory with new config
     this.getPixelCoordinates = createPixelCoordinatesFactory(
       this.config.tileSize,
       this.config.viewportWidth ?? 800,
       this.config.viewportHeight ?? 600
     );
+  }
+
+  /**
+   * Reinitialize the arena with current configuration
+   * This will regenerate and re-render tiles and reload assets
+   */
+  async reinitialize(): Promise<void> {
+    // Clear existing visual content
+    this.clear();
+
+    // Reload assets and regenerate tiles with new config
+    await this.loadAssets();
+    this.generateTiles();
+    this.renderTiles();
   }
 
   getTileAt(coords: AxialCoordinates): HexTile | null {
