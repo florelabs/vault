@@ -4,6 +4,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { BattleBlocks } from "./battle-blocks.js";
+import type { BattleProgram, BlockGrammar } from "./types.js";
 
 describe("BattleBlocks", () => {
   let element: BattleBlocks;
@@ -51,5 +52,71 @@ describe("BattleBlocks", () => {
   it("should get XML representation", () => {
     const xml = element.getXML();
     expect(typeof xml).toBe("string");
+  });
+
+  it("should load and get grammar", async () => {
+    const customGrammar: BlockGrammar = {
+      blocks: [
+        {
+          type: "test_block",
+          displayName: "Test Block",
+          args: [],
+        },
+      ],
+    };
+
+    await element.loadGrammar(customGrammar);
+    const grammar = element.getGrammar();
+
+    expect(grammar).toBeDefined();
+    expect(grammar?.blocks).toHaveLength(1);
+    expect(grammar?.blocks[0].type).toBe("test_block");
+  });
+
+  it("should get default program format", () => {
+    const program = element.getProgram();
+    expect(program).toBeDefined();
+    expect(program.variables).toEqual([]);
+    expect(program.routines).toBeDefined();
+    expect(Array.isArray(program.routines)).toBe(true);
+  });
+
+  it("should load program from JSON", () => {
+    const sampleProgram: BattleProgram = {
+      variables: [],
+      routines: [
+        {
+          name: "main",
+          args: [],
+          body: [
+            {
+              type: "move_toward",
+              x: 100,
+              y: 50,
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(() => element.loadProgram(sampleProgram)).not.toThrow();
+  });
+
+  it("should set and get theme", () => {
+    const theme = {
+      background: "#1e1e1e",
+      border: "#424242",
+    };
+
+    element.setTheme(theme);
+    const currentTheme = element.getTheme();
+
+    expect(currentTheme.background).toBe("#1e1e1e");
+    expect(currentTheme.border).toBe("#424242");
+  });
+
+  it("should handle theme attribute", () => {
+    element.setAttribute("theme", "dark");
+    expect(element.getAttribute("theme")).toBe("dark");
   });
 });
