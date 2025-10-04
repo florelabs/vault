@@ -6,6 +6,10 @@
  */
 
 import * as Blockly from "blockly";
+import defaultGrammar from "./default-grammar.json";
+import { generateBlocksFromGrammar, generateToolboxFromGrammar, loadGrammar } from "./grammar.js";
+import { deserializeFromProgram, serializeToProgram } from "./serializer.js";
+import type { BattleProgram, BlockGrammar, ThemeConfig } from "./types.js";
 
 export interface BattleInstruction {
   type: string;
@@ -18,6 +22,7 @@ export interface CodeChangeEvent extends CustomEvent {
   detail: {
     code: string;
     ast: BattleInstruction[];
+    program: BattleProgram;
     workspace: Blockly.Workspace;
   };
 }
@@ -25,6 +30,8 @@ export interface CodeChangeEvent extends CustomEvent {
 export class BattleBlocks extends HTMLElement {
   private workspace: Blockly.Workspace | null = null;
   private blocklyDiv: HTMLDivElement | null = null;
+  private grammar: BlockGrammar | null = null;
+  private currentTheme: ThemeConfig = {};
 
   static get observedAttributes(): string[] {
     return ["readonly", "theme"];
@@ -32,13 +39,16 @@ export class BattleBlocks extends HTMLElement {
 
   constructor() {
     super();
-    this.attachShadow({ mode: "closed" });
+    this.attachShadow({ mode: "open" });
     this.setupStyles();
     this.setupBlocklyContainer();
   }
 
   connectedCallback(): void {
-    this.initializeBlockly();
+    // Load default grammar and initialize
+    this.loadGrammar(defaultGrammar as BlockGrammar)
+      .then(() => this.initializeBlockly())
+      .catch(console.error);
   }
 
   disconnectedCallback(): void {
@@ -60,15 +70,30 @@ export class BattleBlocks extends HTMLElement {
         display: block;
         width: 100%;
         height: 500px;
-        border: 1px solid #ccc;
+        border: 1px solid var(--battle-blocks-border, #ccc);
         border-radius: 4px;
         overflow: hidden;
+        background: var(--battle-blocks-background, #ffffff);
+        box-shadow: var(--battle-blocks-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
       }
       
       .blockly-container {
         width: 100%;
         height: 100%;
         position: relative;
+      }
+      
+      /* Material-like theming support */
+      :host([theme="dark"]) {
+        --battle-blocks-background: #1e1e1e;
+        --battle-blocks-border: #424242;
+        --battle-blocks-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+      
+      :host([theme="light"]) {
+        --battle-blocks-background: #ffffff;
+        --battle-blocks-border: #e0e0e0;
+        --battle-blocks-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
     `;
     this.shadowRoot.appendChild(style);
@@ -84,14 +109,14 @@ export class BattleBlocks extends HTMLElement {
   }
 
   private initializeBlockly(): void {
-    if (!this.blocklyDiv) return;
+    if (!this.blocklyDiv || !this.grammar) return;
 
-    // Define custom blocks for battle arena
-    this.defineCustomBlocks();
+    // Generate blocks from grammar
+    generateBlocksFromGrammar(this.grammar);
 
     // Initialize workspace
     this.workspace = Blockly.inject(this.blocklyDiv, {
-      toolbox: this.createToolbox(),
+      toolbox: generateToolboxFromGrammar(this.grammar),
       scrollbars: true,
       horizontalLayout: false,
       toolboxPosition: "start",
@@ -120,108 +145,17 @@ export class BattleBlocks extends HTMLElement {
     });
   }
 
-  private defineCustomBlocks(): void {
-    // Define battle action block
-    Blockly.Blocks.battle_action = {
-      init: function () {
-        this.appendDummyInput()
-          .appendField("Battle Action")
-          .appendField(
-            new Blockly.FieldDropdown([
-              ["Move", "move"],
-              ["Attack", "attack"],
-              ["Cast Skill", "skill"],
-              ["Wait", "wait"],
-            ]),
-            "ACTION_TYPE"
-          );
-
-        this.appendValueInput("TARGET").setCheck("String").appendField("target");
-
-        this.appendStatementInput("PARAMETERS").appendField("with parameters");
-
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Defines a battle action");
-        this.setHelpUrl("");
-      },
-    };
-
-    // Define parameter block
-    Blockly.Blocks.battle_parameter = {
-      init: function () {
-        this.appendDummyInput()
-          .appendField("Parameter")
-          .appendField(new Blockly.FieldTextInput("name"), "PARAM_NAME")
-          .appendField("=");
-
-        this.appendValueInput("VALUE").setCheck(null);
-
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(160);
-        this.setTooltip("Sets a parameter for a battle action");
-        this.setHelpUrl("");
-      },
-    };
-
-    // Define position block
-    Blockly.Blocks.battle_position = {
-      init: function () {
-        this.appendDummyInput()
-          .appendField("Position (")
-          .appendField(new Blockly.FieldNumber(0), "X")
-          .appendField(",")
-          .appendField(new Blockly.FieldNumber(0), "Y")
-          .appendField(")");
-
-        this.setOutput(true, "Position");
-        this.setColour(290);
-        this.setTooltip("Defines a position on the battle field");
-        this.setHelpUrl("");
-      },
-    };
-  }
-
-  private createToolbox(): string {
-    return `
-      <xml xmlns="https://developers.google.com/blockly/xml">
-        <category name="Battle Actions" colour="230">
-          <block type="battle_action"></block>
-          <block type="battle_parameter"></block>
-        </category>
-        <category name="Values" colour="290">
-          <block type="battle_position"></block>
-          <block type="text"></block>
-          <block type="math_number"></block>
-        </category>
-        <category name="Logic" colour="210">
-          <block type="controls_if"></block>
-          <block type="logic_compare"></block>
-          <block type="logic_operation"></block>
-          <block type="logic_negate"></block>
-          <block type="logic_boolean"></block>
-        </category>
-        <category name="Loops" colour="120">
-          <block type="controls_repeat_ext"></block>
-          <block type="controls_whileUntil"></block>
-          <block type="controls_for"></block>
-        </category>
-      </xml>
-    `;
-  }
-
   private onWorkspaceChange(): void {
     if (!this.workspace) return;
 
     // Generate code
     const code = this.generateCode();
     const ast = this.generateAST();
+    const program = serializeToProgram(this.workspace);
 
     // Dispatch custom event
     const event: CodeChangeEvent = new CustomEvent("codechange", {
-      detail: { code, ast, workspace: this.workspace },
+      detail: { code, ast, program, workspace: this.workspace },
       bubbles: true,
       cancelable: false,
     }) as CodeChangeEvent;
@@ -276,6 +210,26 @@ const battleInstructions = ${JSON.stringify(this.generateAST(), null, 2)};`;
   }
 
   /**
+   * Load grammar from URL or object
+   */
+  async loadGrammar(source: string | BlockGrammar): Promise<void> {
+    this.grammar = await loadGrammar(source);
+
+    // If workspace already exists, reinitialize with new grammar
+    if (this.workspace && this.blocklyDiv) {
+      this.cleanup();
+      this.initializeBlockly();
+    }
+  }
+
+  /**
+   * Get current grammar
+   */
+  getGrammar(): BlockGrammar | null {
+    return this.grammar;
+  }
+
+  /**
    * Load XML into the workspace
    */
   loadXML(xml: string): void {
@@ -300,6 +254,24 @@ const battleInstructions = ${JSON.stringify(this.generateAST(), null, 2)};`;
   }
 
   /**
+   * Load program from JSON
+   */
+  loadProgram(program: BattleProgram): void {
+    const xml = deserializeFromProgram(program);
+    this.loadXML(xml);
+  }
+
+  /**
+   * Get program as JSON
+   */
+  getProgram(): BattleProgram {
+    if (!this.workspace) {
+      return { variables: [], routines: [] };
+    }
+    return serializeToProgram(this.workspace);
+  }
+
+  /**
    * Get generated code
    */
   getCode(): string {
@@ -311,6 +283,47 @@ const battleInstructions = ${JSON.stringify(this.generateAST(), null, 2)};`;
    */
   getAST(): BattleInstruction[] {
     return this.generateAST();
+  }
+
+  /**
+   * Set theme configuration
+   */
+  setTheme(theme: ThemeConfig): void {
+    this.currentTheme = theme;
+    this.applyTheme();
+  }
+
+  /**
+   * Get current theme
+   */
+  getTheme(): ThemeConfig {
+    return { ...this.currentTheme };
+  }
+
+  /**
+   * Apply theme to component
+   */
+  private applyTheme(): void {
+    if (!this.shadowRoot) return;
+
+    const host = this.shadowRoot.host as HTMLElement;
+
+    // Apply CSS custom properties
+    if (this.currentTheme.primary) {
+      host.style.setProperty("--battle-blocks-primary", this.currentTheme.primary);
+    }
+    if (this.currentTheme.secondary) {
+      host.style.setProperty("--battle-blocks-secondary", this.currentTheme.secondary);
+    }
+    if (this.currentTheme.background) {
+      host.style.setProperty("--battle-blocks-background", this.currentTheme.background);
+    }
+    if (this.currentTheme.border) {
+      host.style.setProperty("--battle-blocks-border", this.currentTheme.border);
+    }
+    if (this.currentTheme.shadow) {
+      host.style.setProperty("--battle-blocks-shadow", this.currentTheme.shadow);
+    }
   }
 }
 

@@ -13,4 +13,7 @@ export default defineConfig({
   splitting: false,
   bundle: true,
   external: ["blockly"],
+  loader: {
+    ".json": "copy",
+  },
 });
