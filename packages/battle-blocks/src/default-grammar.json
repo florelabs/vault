@@ -1,0 +1,79 @@
+{
+  "variables": [
+    {
+      "name": "enemy_id",
+      "type": "string",
+      "description": "ID of the nearest enemy"
+    },
+    {
+      "name": "enemy_pos",
+      "type": "object",
+      "properties": {
+        "x": "number",
+        "y": "number"
+      },
+      "description": "Position of the enemy"
+    }
+  ],
+  "routines": [
+    {
+      "name": "main",
+      "args": [],
+      "description": "Main routine for battle logic"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "set_var",
+      "displayName": "Set Variable",
+      "category": "Variables",
+      "colour": 330,
+      "args": [{ "name": "var_name", "type": "string" }, { "name": "value", "type": "any" }],
+      "description": "Assign a value to a variable"
+    },
+    {
+      "type": "call",
+      "displayName": "Call Method",
+      "category": "Actions",
+      "colour": 230,
+      "args": [{ "name": "method", "type": "object" }],
+      "description": "Call a method with arguments"
+    },
+    {
+      "type": "move_toward",
+      "displayName": "Move Toward",
+      "category": "Actions",
+      "colour": 230,
+      "args": [{ "name": "x", "type": "number" }, { "name": "y", "type": "number" }],
+      "description": "Move character toward coordinates"
+    },
+    {
+      "type": "cast",
+      "displayName": "Cast Skill",
+      "category": "Actions",
+      "colour": 230,
+      "args": [
+        { "name": "skill_id", "type": "string" },
+        { "name": "x", "type": "number" },
+        { "name": "y", "type": "number" }
+      ],
+      "description": "Cast a skill at target coordinates"
+    },
+    {
+      "type": "get_nearest_enemy",
+      "displayName": "Get Nearest Enemy",
+      "category": "Query",
+      "colour": 160,
+      "args": [],
+      "description": "Returns the ID of the nearest enemy"
+    },
+    {
+      "type": "get_position",
+      "displayName": "Get Position",
+      "category": "Query",
+      "colour": 160,
+      "args": [{ "name": "agent_id", "type": "string" }],
+      "description": "Returns the position of an agent"
+    }
+  ]
+}

@@ -3,3 +3,7 @@
  */
 
 export * from "./battle-blocks.js";
+export * from "./types.js";
+export * from "./grammar.js";
+export * from "./serializer.js";
+export { default as defaultGrammar } from "./default-grammar.json";
